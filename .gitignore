@@ -17,3 +17,6 @@ web/playwright-report/
 !.env.example
 .DS_Store
 *.swp
+
+# Local agent worktrees
+.claude/worktrees/

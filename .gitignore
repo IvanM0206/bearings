@@ -1,0 +1,19 @@
+# Go
+cli/dist/
+cli/bearings
+*.test
+*.out
+# Web
+node_modules/
+web/dist/
+web/dev-dist/
+web/test-results/
+web/playwright-report/
+*.tsbuildinfo
+.vercel
+# Env and local files
+.env
+.env.*
+!.env.example
+.DS_Store
+*.swp

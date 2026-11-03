@@ -1,0 +1,6 @@
+format: 1
+language: es
+template:
+  id: trading-bots-developer-es
+  title: "Programador en un equipo de bots de inversión"
+  description: "Punto de partida para un programador que entra a un equipo que construye bots de inversión y trading."

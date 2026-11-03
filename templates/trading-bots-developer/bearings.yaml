@@ -1,0 +1,6 @@
+format: 1
+language: en
+template:
+  id: trading-bots-developer
+  title: "Developer on a trading bots team"
+  description: "Starting point for a software developer joining a team that builds investment and trading bots."

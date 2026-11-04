@@ -80,7 +80,7 @@ func TestTranslator(t *testing.T) {
 	if es.T("common.yes") != tr.T("common.yes") {
 		t.Errorf("es without catalog must fall back to en")
 	}
-	if got := tr.T("progress.totals", 1, 2); !strings.Contains(got, "1") || !strings.Contains(got, "2") {
+	if got := tr.T("path.title", 1, 2); !strings.Contains(got, "1") || !strings.Contains(got, "2") {
 		t.Errorf("args not formatted: %q", got)
 	}
 }

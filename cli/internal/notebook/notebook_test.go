@@ -487,6 +487,24 @@ func TestSearch(t *testing.T) {
 	}
 }
 
+func TestSearchResources(t *testing.T) {
+	h := newHarness(t)
+	nb := h.nb
+	must[Section](t)(nb.AddSection(NewSection{Slug: "tech", Title: "Tech"}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "tech", Slug: "bt", Title: "Backtesting", Notes: "plain notes",
+		Resources: []Resource{{URL: "https://example.com/wiki/quantlib", Title: "Candle Handbook"}}}))
+	for _, q := range []string{"handbook", "QUANTLIB"} {
+		hits := must[[]SearchHit](t)(nb.Search(q, SearchOptions{}))
+		if len(hits) != 1 || hits[0].Kind != HitTopic || hits[0].Field != "resources" || hits[0].Snippet == "" {
+			t.Fatalf("%q: %+v", q, hits)
+		}
+	}
+	// Title and body matches win over resources.
+	if hits := must[[]SearchHit](t)(nb.Search("backtesting", SearchOptions{})); len(hits) != 1 || hits[0].Field != "title" {
+		t.Fatalf("%+v", hits)
+	}
+}
+
 func TestSourceEditing(t *testing.T) {
 	h := newHarness(t)
 	nb := h.nb

@@ -129,7 +129,7 @@ type SearchHit struct {
 	EntryID string   `json:"entry_id,omitempty"`
 	Date    Date     `json:"date"`
 	Title   string   `json:"title,omitempty"`
-	Field   string   `json:"field"` // "title" or "body"
+	Field   string   `json:"field"` // "title", "body" or "resources"
 	Snippet string   `json:"snippet"`
 }
 
@@ -149,11 +149,13 @@ func (nb *Notebook) Search(query string, opts SearchOptions) ([]SearchHit, error
 	needle, _ := fold(q)
 	var hits []SearchHit
 	full := func() bool { return opts.Limit > 0 && len(hits) >= opts.Limit }
-	add := func(h SearchHit, title, body string) {
+	add := func(h SearchHit, title, body string, resources []Resource) {
 		if s, ok := match(needle, title); ok {
 			h.Field, h.Snippet = "title", s
 		} else if s, ok := match(needle, body); ok {
 			h.Field, h.Snippet = "body", s
+		} else if s, ok := matchResources(needle, resources); ok {
+			h.Field, h.Snippet = "resources", s
 		} else {
 			return
 		}
@@ -165,12 +167,12 @@ func (nb *Notebook) Search(query string, opts SearchOptions) ([]SearchHit, error
 	}
 	for _, st := range outline {
 		s := st.Section
-		add(SearchHit{Kind: HitSection, Section: s.Slug, Title: s.Title}, s.Title, s.Description)
+		add(SearchHit{Kind: HitSection, Section: s.Slug, Title: s.Title}, s.Title, s.Description, nil)
 		for _, t := range st.Topics {
 			if full() {
 				return hits, nil
 			}
-			add(SearchHit{Kind: HitTopic, Section: t.Section, Topic: t.Ref(), Title: t.Title}, t.Title, t.Notes)
+			add(SearchHit{Kind: HitTopic, Section: t.Section, Topic: t.Ref(), Title: t.Title}, t.Title, t.Notes, t.Resources)
 		}
 	}
 	entries, err := nb.Journal(JournalFilter{})
@@ -181,7 +183,7 @@ func (nb *Notebook) Search(query string, opts SearchOptions) ([]SearchHit, error
 		if full() {
 			break
 		}
-		add(SearchHit{Kind: HitEntry, Section: e.Section, Topic: e.Topic, EntryID: e.ID, Date: e.Date}, "", e.Body)
+		add(SearchHit{Kind: HitEntry, Section: e.Section, Topic: e.Topic, EntryID: e.ID, Date: e.Date}, "", e.Body, nil)
 	}
 	if opts.Limit > 0 && len(hits) > opts.Limit {
 		hits = hits[:opts.Limit]
@@ -208,6 +210,18 @@ func fold(s string) ([]rune, []int) {
 		i++
 	}
 	return out, idx
+}
+
+// matchResources looks for needle in the titles and URLs of resources.
+func matchResources(needle []rune, resources []Resource) (string, bool) {
+	for _, r := range resources {
+		for _, text := range []string{r.Title, r.URL} {
+			if s, ok := match(needle, text); ok {
+				return s, true
+			}
+		}
+	}
+	return "", false
 }
 
 const snippetContext = 40

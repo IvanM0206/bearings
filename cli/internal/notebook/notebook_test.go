@@ -668,7 +668,6 @@ func TestReorderWithEqualOrders(t *testing.T) {
 	}
 }
 
-
 func TestReorderTopicWithTiesElsewhere(t *testing.T) {
 	h := newHarness(t)
 	nb := h.nb

@@ -163,8 +163,72 @@ func (nb *Notebook) MoveSection(from, to string) (Section, error) {
 	return s, err
 }
 
+// sectionVictim is a topic file that deleting a section would remove.
+type sectionVictim struct {
+	rel string
+	v   Version
+}
+
+// sectionContents lists what deleting the section would remove and fails with
+// CodeSectionNotDeletable, naming the offending files (names only), if the
+// directory holds anything other than valid topic files and the section
+// metadata: a topic that does not parse or validate, a symlink, a
+// directory, or any other file.
+func (nb *Notebook) sectionContents(slug string) ([]sectionVictim, error) {
+	entries, err := nb.fs.readDir(sectionDirRel(slug))
+	if err != nil {
+		return nil, err
+	}
+	var victims []sectionVictim
+	var bad []string
+	metaName := SectionFile
+	for _, e := range entries {
+		name := e.Name()
+		if name == metaName {
+			continue
+		}
+		topicSlug, ok := strings.CutSuffix(name, ".md")
+		if !ok || !ValidSlug(topicSlug) || !e.Type().IsRegular() {
+			bad = append(bad, name)
+			continue
+		}
+		rel := topicRel(TopicRef{slug, topicSlug})
+		data, err := nb.fs.readFile(rel)
+		if err != nil {
+			bad = append(bad, name)
+			continue
+		}
+		if _, err := ParseTopic(slug, topicSlug, data); err != nil {
+			bad = append(bad, name)
+			continue
+		}
+		victims = append(victims, sectionVictim{rel, versionOf(data)})
+	}
+	if len(bad) > 0 {
+		e := newErr(CodeSectionNotDeletable, sectionDirRel(slug), "")
+		e.Names = bad
+		return nil, e
+	}
+	return victims, nil
+}
+
+// SectionDeletable checks that DeleteSection would succeed in removing
+// everything the section holds, and returns the number of topics it would
+// delete. It changes nothing.
+func (nb *Notebook) SectionDeletable(slug string) (int, error) {
+	nb.mu.Lock()
+	defer nb.mu.Unlock()
+	if _, err := nb.loadSection(slug); err != nil {
+		return 0, err
+	}
+	victims, err := nb.sectionContents(slug)
+	return len(victims), err
+}
+
 // DeleteSection deletes a section with all its topics and clears journal
-// references to it.
+// references to it. It refuses, deleting nothing, with
+// CodeSectionNotDeletable if the section directory holds any file that is
+// not a valid topic (see [Error.Names]).
 func (nb *Notebook) DeleteSection(slug string) error {
 	nb.mu.Lock()
 	defer nb.mu.Unlock()
@@ -172,24 +236,11 @@ func (nb *Notebook) DeleteSection(slug string) error {
 	if err != nil {
 		return err
 	}
-	names, err := nb.topicFileNames(slug)
+	// Check and read everything first, so that a file that cannot be
+	// accepted stops the operation before anything is deleted.
+	victims, err := nb.sectionContents(slug)
 	if err != nil {
 		return err
-	}
-	// Read everything first, so that a file that cannot be read stops the
-	// operation before anything is deleted.
-	type victim struct {
-		rel string
-		v   Version
-	}
-	victims := make([]victim, 0, len(names))
-	for _, name := range names {
-		rel := topicRel(TopicRef{slug, name})
-		data, err := nb.fs.readFile(rel)
-		if err != nil {
-			return err
-		}
-		victims = append(victims, victim{rel, versionOf(data)})
 	}
 	for _, v := range victims {
 		if err := nb.fs.removeFile(v.rel, v.v); err != nil {
@@ -217,7 +268,7 @@ type NewTopic struct {
 	Slug      string // optional; derived from Title when empty
 	Title     string
 	Status    Status    // default pending
-	Type      TopicType // default personal
+	Type      TopicType // default role
 	Suggested bool
 	Order     *int // optional; after the last topic of the section when nil
 	Resources []Resource
@@ -261,7 +312,7 @@ func (nb *Notebook) AddTopic(in NewTopic) (Topic, error) {
 		t.Status = StatusPending
 	}
 	if t.Type == "" {
-		t.Type = TypePersonal
+		t.Type = TypeRole
 	}
 	if in.Order != nil {
 		t.Order = *in.Order

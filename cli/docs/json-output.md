@@ -44,8 +44,8 @@ objects as the read commands (`<topic>` is the `show` topic object,
 | `log` | `{"entry": <entry>}` |
 | `section add`, `section rename` | `{"section": <section>}` |
 | `section mv` | `{"section": <section>, "moved": bool, "order": [slug]}` (`moved` is false when the section was already first or last) |
-| `section rm` | `{"deleted": {"section", "topics", "journal_entries_unlinked"}}` |
-| `topic add`, `topic edit` | `{"topic": <topic>}` |
+| `section rm` | `{"deleted": {"section", "topics", "journal_entries_unlinked"}}` | Refuses (exit 3, notebook invalid) if the section directory holds anything but valid topics; the error lists the file names.
+| `topic add`, `topic edit` | `{"topic": <topic>}` | `topic add` creates a `role` topic unless `--type personal` is given.
 | `topic mv` | `{"topic": <topic>, "moved": bool, "order": [ref]}` (`order` lists the topics of the topic's section, after the move) |
 | `topic rm` | `{"deleted": {"topic", "resources", "journal_entries_unlinked"}}` |
 | `advance`, `status` | `{"topic": <topic>, "previous_status", "changed": bool}` |

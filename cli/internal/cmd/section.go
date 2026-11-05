@@ -148,7 +148,9 @@ func (a *app) runSectionRm(slug string, yes bool) error {
 	if err != nil {
 		return err
 	}
-	topics, err := nb.Topics(s.Slug)
+	// Refuse before asking: the count in the prompt must be exactly what
+	// DeleteSection will remove.
+	topicCount, err := nb.SectionDeletable(s.Slug)
 	if err != nil {
 		return a.wrap(err)
 	}
@@ -156,7 +158,7 @@ func (a *app) runSectionRm(slug string, yes bool) error {
 	if err != nil {
 		return a.wrap(err)
 	}
-	if err := a.confirm(yes, a.t("section.rm_prompt", s.Slug, output.Line(s.Title), len(topics), len(entries))); err != nil {
+	if err := a.confirm(yes, a.t("section.rm_prompt", s.Slug, output.Line(s.Title), topicCount, len(entries))); err != nil {
 		return err
 	}
 	if err := nb.DeleteSection(s.Slug); err != nil {
@@ -164,11 +166,11 @@ func (a *app) runSectionRm(slug string, yes bool) error {
 	}
 	if a.jsonOut {
 		var res sectionRemovedJSON
-		res.Deleted.Section, res.Deleted.Topics, res.Deleted.Entries = s.Slug, len(topics), len(entries)
+		res.Deleted.Section, res.Deleted.Topics, res.Deleted.Entries = s.Slug, topicCount, len(entries)
 		return a.writeJSON(res)
 	}
 	p := a.out()
-	p.println(a.t("section.removed", s.Slug, len(topics), len(entries)))
+	p.println(a.t("section.removed", s.Slug, topicCount, len(entries)))
 	return p.err
 }
 

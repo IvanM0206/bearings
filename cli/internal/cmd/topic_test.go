@@ -31,14 +31,14 @@ func TestTopicAdd(t *testing.T) {
 	dir := newFixture(t)
 	r := at(t, dir, "topic", "add", "team", "On-call", "handover")
 	wantOK(t, r)
-	if r.stdout != "Added topic team/on-call-handover (On-call handover), personal, pending.\n" {
+	if r.stdout != "Added topic team/on-call-handover (On-call handover), role, pending.\n" {
 		t.Errorf("stdout %q", r.stdout)
 	}
 	if got := lsRefs(t, dir, "team"); !reflect.DeepEqual(got, []string{"team/rituals", "team/who-is-who", "team/on-call-handover"}) {
 		t.Errorf("new topics go last: %v", got)
 	}
 	f := readFile(t, dir, "sections/team/on-call-handover.md")
-	for _, want := range []string{"status: pending\n", "type: personal\n", "order: 2\n", "created: 2026-11-04T08:30:00Z\n", "updated: 2026-11-04T08:30:00Z\n"} {
+	for _, want := range []string{"status: pending\n", "type: role\n", "order: 2\n", "created: 2026-11-04T08:30:00Z\n", "updated: 2026-11-04T08:30:00Z\n"} {
 		if !strings.Contains(f, want) {
 			t.Errorf("%q not in\n%s", want, f)
 		}
@@ -50,10 +50,16 @@ func TestTopicAdd(t *testing.T) {
 		}
 	}
 
+	r = at(t, dir, "topic", "add", "team", "Private", "--type", "personal", "--json")
+	wantOK(t, r)
+	if decode(t, r.stdout)["topic"].(map[string]any)["type"] != "personal" {
+		t.Errorf("--type personal ignored: %s", r.stdout)
+	}
+
 	r = at(t, dir, "topic", "add", "team", "Rituals", "--type", "role", "--status", "in-progress", "--json")
 	wantOK(t, r)
 	tp := decode(t, r.stdout)["topic"].(map[string]any)
-	if tp["ref"] != "team/rituals-2" || tp["type"] != "role" || tp["status"] != "in-progress" || tp["order"] != 3.0 || tp["section_title"] != "Team" {
+	if tp["ref"] != "team/rituals-2" || tp["type"] != "role" || tp["status"] != "in-progress" || tp["order"] != 4.0 || tp["section_title"] != "Team" {
 		t.Errorf("%v", tp)
 	}
 	if !reflect.DeepEqual(keys(tp), keys(showTopic(t, dir, "team/rituals-2"))) {

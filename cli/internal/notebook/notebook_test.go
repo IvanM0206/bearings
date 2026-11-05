@@ -2,9 +2,12 @@ package notebook
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -169,7 +172,7 @@ func TestSectionsAndTopics(t *testing.T) {
 	}
 
 	a := must[Topic](t)(nb.AddTopic(NewTopic{Section: "tecnico", Title: "Arquitectura", Type: TypeRole}))
-	b := must[Topic](t)(nb.AddTopic(NewTopic{Section: "tecnico", Title: "Backtesting", Order: ptr(0)}))
+	b := must[Topic](t)(nb.AddTopic(NewTopic{Section: "tecnico", Title: "Backtesting", Order: ptr(0), Type: TypePersonal}))
 	if a.Status != StatusPending || b.Type != TypePersonal || a.Order != 0 {
 		t.Fatalf("%+v %+v", a, b)
 	}
@@ -406,17 +409,111 @@ func TestMoveAndDeleteUpdateReferences(t *testing.T) {
 	if _, err := os.Lstat(h.path("sections/people")); !os.IsNotExist(err) {
 		t.Fatalf("section dir still there: %v", err)
 	}
-	// Unknown files inside a deleted section are kept.
-	h.write(t, "sections/tech/README.txt", "keep")
-	if err := nb.DeleteSection("tech"); err != nil {
+}
+
+func TestAddTopicDefaultsToRole(t *testing.T) {
+	h := newHarness(t)
+	must[Section](t)(h.nb.AddSection(NewSection{Slug: "tech", Title: "Tech"}))
+	got := must[Topic](t)(h.nb.AddTopic(NewTopic{Section: "tech", Title: "x"}))
+	if got.Type != TypeRole {
+		t.Fatalf("default type %q, want role", got.Type)
+	}
+	got = must[Topic](t)(h.nb.AddTopic(NewTopic{Section: "tech", Title: "y", Type: TypePersonal}))
+	if got.Type != TypePersonal {
+		t.Fatalf("explicit type %q", got.Type)
+	}
+}
+
+func TestDeleteSectionRefusesUnexpectedFiles(t *testing.T) {
+	setup := func(t *testing.T) *harness {
+		h := newHarness(t)
+		must[Section](t)(h.nb.AddSection(NewSection{Slug: "tech", Title: "Tech"}))
+		must[Topic](t)(h.nb.AddTopic(NewTopic{Section: "tech", Slug: "good", Title: "Good"}))
+		must[Entry](t)(h.nb.AddEntry(NewEntry{Date: Date{2026, 11, 3}, Section: "tech", Body: "x"}))
+		return h
+	}
+	tests := []struct {
+		name  string
+		setup func(t *testing.T, h *harness)
+		want  []string
+	}{
+		{"invalid topic", func(t *testing.T, h *harness) { h.write(t, "sections/tech/broken.md", "not a topic") }, []string{"broken.md"}},
+		{"unknown file", func(t *testing.T, h *harness) { h.write(t, "sections/tech/README.txt", "keep") }, []string{"README.txt"}},
+		{"symlink", func(t *testing.T, h *harness) {
+			if err := os.Symlink(h.path("sections/tech/good.md"), h.path("sections/tech/link.md")); err != nil {
+				t.Skip(err)
+			}
+		}, []string{"link.md"}},
+		{"subdirectory", func(t *testing.T, h *harness) {
+			if err := os.Mkdir(h.path("sections/tech/sub"), 0o700); err != nil {
+				t.Fatal(err)
+			}
+		}, []string{"sub"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := setup(t)
+			tt.setup(t, h)
+			before := snapshot(t, h.dir)
+			_, err := h.nb.SectionDeletable("tech")
+			checkRefused(t, err, tt.want)
+			err = h.nb.DeleteSection("tech")
+			checkRefused(t, err, tt.want)
+			if after := snapshot(t, h.dir); after != before {
+				t.Fatalf("notebook changed:\n%s\n---\n%s", before, after)
+			}
+		})
+	}
+	t.Run("all valid", func(t *testing.T) {
+		h := setup(t)
+		n, err := h.nb.SectionDeletable("tech")
+		if err != nil || n != 1 {
+			t.Fatalf("%d %v", n, err)
+		}
+		if err := h.nb.DeleteSection("tech"); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := os.Lstat(h.path("sections/tech")); !os.IsNotExist(err) {
+			t.Fatalf("section dir still there: %v", err)
+		}
+		es := must[[]Entry](t)(h.nb.Journal(JournalFilter{}))
+		if len(es) != 1 || es[0].Section != "" {
+			t.Fatalf("%+v", es)
+		}
+	})
+}
+
+func checkRefused(t *testing.T, err error, want []string) {
+	t.Helper()
+	var ne *Error
+	if !errors.As(err, &ne) || ne.Code != CodeSectionNotDeletable {
+		t.Fatalf("got %v, want %s", err, CodeSectionNotDeletable)
+	}
+	if !reflect.DeepEqual(ne.Names, want) {
+		t.Fatalf("names %v, want %v", ne.Names, want)
+	}
+}
+
+// snapshot lists every path under dir with its type and content.
+func snapshot(t *testing.T, dir string) string {
+	t.Helper()
+	var b strings.Builder
+	err := filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(&b, "%s %v\n", p, d.Type())
+		if d.Type().IsRegular() {
+			data, _ := os.ReadFile(p)
+			b.Write(data)
+			b.WriteByte('\n')
+		}
+		return nil
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(h.path("sections/tech/README.txt")); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := os.Stat(h.path("sections/tech/x.md")); !os.IsNotExist(err) {
-		t.Fatal(err)
-	}
+	return b.String()
 }
 
 func TestInvalidFilesAreSkipped(t *testing.T) {

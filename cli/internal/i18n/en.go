@@ -32,7 +32,7 @@ func init() {
 		"cmd.topic.short":          "Manage topics",
 		"cmd.topic.long":           "Topics are the things you need to learn inside a section. Subcommands: add, edit, rm, mv, ls. To change the notes of a topic, use 'bearings edit <section>/<topic>'.",
 		"cmd.topic_add.short":      "Add a topic to a section",
-		"cmd.topic_add.long":       "Adds a topic after the existing ones of the section. By default it is a personal topic that is pending; use --type role for topics that belong in the role path. Its name (used in references) is derived from the title and never changes afterwards.",
+		"cmd.topic_add.long":       "Adds a topic after the existing ones of the section. By default it is a role topic that is pending, so it appears in the role path; use --type personal for topics that must stay out of it. Its name (used in references) is derived from the title and never changes afterwards.",
 		"cmd.topic_edit.short":     "Change a topic's title, type or resources",
 		"cmd.topic_edit.long":      "Changes the title, the type or the resources of a topic. Removing a resource asks for confirmation on a terminal; scripts must pass --yes. To edit the notes use 'bearings edit'.",
 		"cmd.topic_rm.short":       "Delete a topic",
@@ -86,7 +86,7 @@ func init() {
 		"flag.up":          "move one place up",
 		"flag.down":        "move one place down",
 
-		"flag.type_new":        "type of the topic: role (part of the role path) or personal",
+		"flag.type_new":        "type of the topic: role (part of the role path, the default) or personal",
 		"flag.status_new":      "initial status: pending, in-progress, mastered (default pending)",
 		"flag.new_title":       "new title",
 		"flag.clear_suggested": "mark the topic as reviewed (no longer suggested)",
@@ -243,6 +243,7 @@ func init() {
 		"err.recovery_saved":           "your text was saved to %s (only you can read it; delete it when you no longer need it)",
 
 		"err.detail.file":  "file %s",
+		"err.detail.files": "files: %s",
 		"err.detail.field": "field %s",
 		"err.detail.line":  "line %d",
 		"err.detail.limit": "limit %s, maximum %d",
@@ -286,6 +287,7 @@ func init() {
 		"err.code.already_exists":           "already exists",
 		"err.code.ambiguous":                "ambiguous reference",
 		"err.code.conflict":                 "the file changed while it was being edited",
+		"err.code.section_not_deletable":    "the section holds files that are not valid topics; fix or remove them by hand first, nothing was deleted",
 		"err.code.symlink":                  "symbolic links are not followed",
 		"err.code.not_regular_file":         "not a regular file",
 		"err.code.outside_root":             "path is outside the notebook",

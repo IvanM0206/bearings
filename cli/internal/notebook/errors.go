@@ -59,9 +59,11 @@ const (
 	CodeAmbiguous   Code = "ambiguous"
 	CodeConflict    Code = "conflict"
 	CodeSymlink     Code = "symlink"
-	CodeNotRegular  Code = "not_regular_file"
-	CodeOutsideRoot Code = "outside_root"
-	CodeIO          Code = "io"
+	// CodeSectionNotDeletable: the section holds files that are not valid topics.
+	CodeSectionNotDeletable Code = "section_not_deletable"
+	CodeNotRegular          Code = "not_regular_file"
+	CodeOutsideRoot         Code = "outside_root"
+	CodeIO                  Code = "io"
 )
 
 // Limit names, used in [Error.Limit] for [CodeLimit] errors.
@@ -81,13 +83,14 @@ const (
 // taken from the file (truncated); callers that print it to a terminal must
 // sanitize it like any other notebook content.
 type Error struct {
-	Code  Code   // what went wrong
-	Path  string // slash-separated path relative to the notebook root, if any
-	Field string // YAML key or argument name, if any
-	Limit string // limit name, for CodeLimit
-	Max   int64  // maximum allowed value, for CodeLimit, CodeTooLong and CodeOutOfRange
-	Line  int    // 1-based line inside the frontmatter, for YAML errors, if known
-	Err   error  // underlying error (I/O), if any; never wraps file content
+	Code  Code     // what went wrong
+	Path  string   // slash-separated path relative to the notebook root, if any
+	Field string   // YAML key or argument name, if any
+	Limit string   // limit name, for CodeLimit
+	Max   int64    // maximum allowed value, for CodeLimit, CodeTooLong and CodeOutOfRange
+	Line  int      // 1-based line inside the frontmatter, for YAML errors, if known
+	Names []string // file names (never contents), for CodeSectionNotDeletable
+	Err   error    // underlying error (I/O), if any; never wraps file content
 }
 
 func (e *Error) Error() string {

@@ -241,6 +241,13 @@ func (a *app) describe(e *notebook.Error) string {
 	if e.Limit != "" {
 		details = append(details, a.t("err.detail.limit", output.Line(e.Limit), e.Max))
 	}
+	if len(e.Names) > 0 {
+		names := make([]string, len(e.Names))
+		for i, n := range e.Names {
+			names[i] = output.Line(n)
+		}
+		details = append(details, a.t("err.detail.files", strings.Join(names, ", ")))
+	}
 	if e.Code == notebook.CodeIO && e.Err != nil {
 		details = append(details, output.Line(e.Err.Error()))
 	}

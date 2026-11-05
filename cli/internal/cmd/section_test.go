@@ -221,6 +221,31 @@ func TestSectionRm(t *testing.T) {
 			t.Errorf("%v", j)
 		}
 	})
+	t.Run("refuses a section with files that are not valid topics", func(t *testing.T) {
+		dir := newFixture(t)
+		must(t, os.WriteFile(filepath.Join(dir, "sections", "technical", "broken.md"), []byte("SECRET-CONTENT"), 0o600))
+		must(t, os.WriteFile(filepath.Join(dir, "sections", "technical", "notes.txt"), []byte("x"), 0o600))
+		for _, o := range []opts{
+			{env: map[string]string{"BEARINGS_NOTEBOOK": dir}, stdin: "y\n", interactive: true},
+			{env: map[string]string{"BEARINGS_NOTEBOOK": dir}},
+		} {
+			args := []string{"section", "rm", "technical"}
+			if !o.interactive {
+				args = append(args, "--yes")
+			}
+			r := runOpts(t, o, args...)
+			wantFail(t, r, ExitNotebook, "broken.md, notes.txt")
+			if strings.Contains(r.stderr+r.stdout, "SECRET-CONTENT") || strings.Contains(r.stderr, "[y/N]") {
+				t.Errorf("must not leak content or ask: %q", r.stderr)
+			}
+		}
+		if got := sectionSlugs(t, dir); len(got) != 2 {
+			t.Errorf("nothing may be deleted: %v", got)
+		}
+		if _, err := os.Stat(filepath.Join(dir, "sections", "technical", "backtesting.md")); err != nil {
+			t.Error(err)
+		}
+	})
 	t.Run("invalid and missing", func(t *testing.T) {
 		dir := newFixture(t)
 		wantFail(t, at(t, dir, "section", "rm", "nope", "--yes"), ExitNotFound, "does not exist")

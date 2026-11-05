@@ -39,6 +39,9 @@ func (a *app) newRoot() *cobra.Command {
 	root.AddCommand(
 		a.newInit(),
 		a.newSection(),
+		a.newTopic(),
+		a.newAdvance(),
+		a.newStatus(),
 		a.newLs(),
 		a.newShow(),
 		a.newSearch(),

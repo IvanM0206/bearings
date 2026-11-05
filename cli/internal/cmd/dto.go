@@ -84,6 +84,21 @@ type topicJSON struct {
 	Notes        string         `json:"notes"`
 }
 
+func topicOf(t notebook.Topic, sectionTitle string) topicJSON {
+	tj := topicJSON{
+		topicSummaryJSON: topicSummary(t),
+		SectionTitle:     sectionTitle,
+		Resources:        make([]resourceJSON, 0, len(t.Resources)),
+		Created:          notebook.FormatTimestamp(t.Created),
+		Updated:          notebook.FormatTimestamp(t.Updated),
+		Notes:            t.Notes,
+	}
+	for _, r := range t.Resources {
+		tj.Resources = append(tj.Resources, resourceJSON{URL: r.URL, Title: r.Title})
+	}
+	return tj
+}
+
 type entryJSON struct {
 	ID      string `json:"id"`
 	Date    string `json:"date"`

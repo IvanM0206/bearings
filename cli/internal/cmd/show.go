@@ -44,17 +44,7 @@ func (a *app) runShow(arg string) error {
 		return err
 	}
 	if a.jsonOut {
-		tj := topicJSON{
-			topicSummaryJSON: topicSummary(t),
-			SectionTitle:     sec.Title,
-			Resources:        make([]resourceJSON, 0, len(t.Resources)),
-			Created:          notebook.FormatTimestamp(t.Created),
-			Updated:          notebook.FormatTimestamp(t.Updated),
-			Notes:            t.Notes,
-		}
-		for _, r := range t.Resources {
-			tj.Resources = append(tj.Resources, resourceJSON{URL: r.URL, Title: r.Title})
-		}
+		tj := topicOf(t, sec.Title)
 		return a.writeJSON(showJSON{Topic: tj, Journal: entriesOf(entries)})
 	}
 

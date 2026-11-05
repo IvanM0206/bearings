@@ -30,6 +30,33 @@ was deleted).
 
 `path --md` prints Markdown, not JSON, and cannot be combined with `--json`.
 
+## Write commands
+
+Commands that change the notebook accept `--json` too and return what was
+created or changed. Shapes use the same `<topic>`, `<entry>` and `<section>`
+objects as the read commands (`<topic>` is the `show` topic object,
+`<section>` the `ls` section object).
+
+| Command | Shape |
+|---|---|
+| `init` | `{"path", "name", "language", "template", "sections", "topics"}` (`template` is `""` for a blank notebook) |
+| `init --list-templates` | `{"templates": [{"id", "title", "description", "language", "sections", "topics"}]}` |
+| `log` | `{"entry": <entry>}` |
+| `section add`, `section rename` | `{"section": <section>}` |
+| `section mv` | `{"section": <section>, "moved": bool, "order": [slug]}` (`moved` is false when the section was already first or last) |
+| `section rm` | `{"deleted": {"section", "topics", "journal_entries_unlinked"}}` |
+| `topic add`, `topic edit` | `{"topic": <topic>}` |
+| `topic mv` | `{"topic": <topic>, "moved": bool, "order": [ref]}` (`order` lists the topics of the topic's section, after the move) |
+| `topic rm` | `{"deleted": {"topic", "resources", "journal_entries_unlinked"}}` |
+| `advance`, `status` | `{"topic": <topic>, "previous_status", "changed": bool}` |
+| `edit <ref>` | `{"topic": <topic>, "changed": bool}` |
+| `edit --journal <id>` | `{"entry": <entry>, "changed": bool}` |
+
+Commands that delete data (`section rm`, `topic rm`, `topic edit
+--remove-resource`) ask for confirmation on a terminal. Without a terminal
+they exit with code 2 unless `--yes` is given; the question goes to stderr,
+so `--json` output stays clean.
+
 ## Exit codes
 
 | Code | Meaning |

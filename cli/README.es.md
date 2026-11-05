@@ -14,7 +14,7 @@ Idioma: español. [Read in English](README.md).
 
 ## Instalación
 
-Necesitas Go 1.24.7 o posterior (ver `go.mod`), o una copia del código fuente.
+Necesitas Go 1.25 o posterior (ver `go.mod`), o una copia del código fuente.
 
 Desde el proxy de módulos de Go:
 

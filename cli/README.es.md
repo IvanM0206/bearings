@@ -218,6 +218,21 @@ comandos de git para revisarlo.
 bearings completion bash > /etc/bash_completion.d/bearings   # o zsh, fish, powershell
 ```
 
+## MCP
+
+`bearings mcp` ejecuta un servidor MCP local por stdio, para que un asistente
+de IA como Claude Code o Claude Desktop pueda leer el cuaderno. Es de solo
+lectura salvo que se inicie con `--allow-write`, y no tiene herramientas para
+borrar.
+
+```sh
+claude mcp add bearings -- bearings mcp
+```
+
+Consulta [docs/mcp.es.md](../docs/mcp.es.md) (en inglés:
+[docs/mcp.md](../docs/mcp.md)) para ver las herramientas, las notas de
+seguridad y la configuración de Claude Desktop.
+
 ## Confirmación y scripts
 
 Los comandos que eliminan datos (`section rm`, `topic rm`, `topic edit

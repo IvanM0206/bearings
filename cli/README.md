@@ -209,6 +209,19 @@ conflict it stops and prints the git commands to look at it.
 bearings completion bash > /etc/bash_completion.d/bearings   # or zsh, fish, powershell
 ```
 
+## MCP
+
+`bearings mcp` runs a local MCP server over stdio, so that an AI assistant
+such as Claude Code or Claude Desktop can read the notebook. It is read-only
+unless started with `--allow-write`, and it has no delete tools.
+
+```sh
+claude mcp add bearings -- bearings mcp
+```
+
+See [docs/mcp.md](../docs/mcp.md) (Spanish: [docs/mcp.es.md](../docs/mcp.es.md))
+for the tools, the security notes and the setup for Claude Desktop.
+
 ## Confirmation and scripts
 
 Commands that delete data (`section rm`, `topic rm`, `topic edit

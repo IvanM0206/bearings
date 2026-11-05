@@ -1,0 +1,5 @@
+exit 2
+--- stdout
+--- stderr
+bearings: invalid topic reference "backtesting": use <section>/<topic>, for example technical/backtesting
+Run 'bearings --help' for usage.

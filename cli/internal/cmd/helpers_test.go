@@ -54,9 +54,15 @@ var fixtureNow = time.Date(2026, 11, 3, 12, 0, 0, 0, time.UTC)
 //	           2026-10-20 (unlinked)
 func newFixture(t *testing.T) string {
 	t.Helper()
+	return buildFixture(t, &notebook.Options{Now: func() time.Time { return fixtureNow }})
+}
+
+// buildFixture is newFixture with the notebook options (clock, entry id
+// source) chosen by the caller.
+func buildFixture(t *testing.T, opts *notebook.Options) string {
+	t.Helper()
 	dir := filepath.Join(t.TempDir(), "nb")
-	nb, err := notebook.Init(dir, notebook.Config{Format: 1, Name: "Example role", Language: "en"},
-		&notebook.Options{Now: func() time.Time { return fixtureNow }})
+	nb, err := notebook.Init(dir, notebook.Config{Format: 1, Name: "Example role", Language: "en"}, opts)
 	must(t, err)
 	_, err = nb.AddSection(notebook.NewSection{Slug: "technical", Title: "Technical", Order: intp(0), Description: "Systems and tools."})
 	must(t, err)

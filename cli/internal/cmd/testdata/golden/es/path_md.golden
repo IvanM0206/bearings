@@ -1,0 +1,30 @@
+exit 0
+--- stdout
+# Ruta del rol: Example role
+
+## Technical
+
+Systems and tools.
+
+### 1. Backtesting
+
+Download the sample data first.
+Then run the simulator.
+
+**Recursos**
+
+- [Backtesting guide](<https://example.com/wiki/backtesting>)
+- <https://example.com/plain>
+
+### 2. Risk limits
+
+Limits are reviewed weekly.
+
+## Team
+
+### 3. Team rituals
+
+### 4. Who is who
+
+See the org chart.
+--- stderr

@@ -1,0 +1,14 @@
+exit 0
+--- stdout
+Avance
+
+Technical        [######--------------]  1/3   33%
+Team             [##########----------]  1/2   50%
+
+Todos los temas  [########------------]  2/5   40%
+Ruta del rol     [##########----------]  2/4   50%
+Personal         [--------------------]  0/1    0%
+
+Temas sugeridos todavía sin revisar: 1
+Entradas de bitácora: 3
+--- stderr

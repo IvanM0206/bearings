@@ -1,0 +1,10 @@
+exit 0
+--- stdout
+Technical (technical)
+Systems and tools.
+
+TEMA         TÍTULO                ESTADO     TIPO      SUGERIDO
+backtesting  Backtesting           en curso   rol
+risk         Risk limits           dominado   rol
+scratch      My private shortcuts  pendiente  personal  sí
+--- stderr

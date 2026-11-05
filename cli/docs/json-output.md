@@ -51,9 +51,11 @@ objects as the read commands (`<topic>` is the `show` topic object,
 | `advance`, `status` | `{"topic": <topic>, "previous_status", "changed": bool}` |
 | `edit <ref>` | `{"topic": <topic>, "changed": bool}` |
 | `edit --journal <id>` | `{"entry": <entry>, "changed": bool}` |
+| `export <file>` | `{"path", "role_only": bool, "name", "sections", "topics", "journal_entries", "files"}` (`path` is absolute; `files` counts the archive entries) |
+| `import <file>` | `{"path", "name", "sections", "topics", "journal_entries"}` (`path` is the new notebook, absolute) |
 
 Commands that delete data (`section rm`, `topic rm`, `topic edit
---remove-resource`) ask for confirmation on a terminal. Without a terminal
+--remove-resource`), and `import`, ask for confirmation on a terminal. Without a terminal
 they exit with code 2 unless `--yes` is given; the question goes to stderr,
 so `--json` output stays clean.
 

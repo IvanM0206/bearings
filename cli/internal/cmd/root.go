@@ -50,6 +50,8 @@ func (a *app) newRoot() *cobra.Command {
 		a.newJournal(),
 		a.newProgress(),
 		a.newPath(),
+		a.newExport(),
+		a.newImport(),
 	)
 	return root
 }

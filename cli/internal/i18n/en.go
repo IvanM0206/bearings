@@ -62,6 +62,11 @@ func init() {
 		"cmd.path.short":           "Show the role path",
 		"cmd.path.long":            "Shows the role path: all topics of type role, in order, numbered across sections, with a check mark on mastered ones. With --md, prints a Markdown guide that can be shared: it has only role topics, their notes and resources, and no personal progress.",
 
+		"cmd.export.short": "Save the notebook as a ZIP archive",
+		"cmd.export.long":  "Writes the notebook to a ZIP archive that 'bearings import' (and the web app) can read. Only the notebook's own files go in (bearings.yaml, sections and journal), each checked first; anything else in the directory, such as .git, is left out. The same notebook always gives the same archive. With --role-only the archive leaves out the journal and personal topics, so it can be shared as a guide or template for whoever takes the role next. An existing file is only replaced with --force, and the archive cannot be written inside the notebook.",
+		"cmd.import.short": "Create a notebook from a ZIP archive",
+		"cmd.import.long":  "Creates a new notebook from an archive made by 'bearings export' or the web app. The archive is checked completely before anything is written (unsafe names, links, encrypted entries, zip bombs and every notebook file); if anything is wrong, nothing is created. The notebook is created in --into, or else in the notebook location (--notebook, BEARINGS_NOTEBOOK or ~/bearings), which must be empty or not exist: import never merges into or overwrites a notebook. It shows what the archive holds and asks for confirmation on a terminal; scripts must pass --yes.",
+
 		// Flags.
 		"flag.notebook":      "notebook directory (default: $BEARINGS_NOTEBOOK, else ~/bearings)",
 		"flag.json":          "print the result as JSON",
@@ -94,6 +99,11 @@ func init() {
 		"flag.resource_title":  "title for the resource added with --add-resource",
 		"flag.remove_resource": "remove the resource with this URL (asks for confirmation)",
 		"flag.to_section":      "move the topic to the end of this section",
+
+		"flag.force":      "replace the file if it already exists",
+		"flag.role_only":  "leave out the journal and personal topics (a guide or template to share)",
+		"flag.into":       "directory for the new notebook (default: the notebook location)",
+		"flag.yes_import": "import without asking (needed in scripts)",
 
 		"flag.log_section": "link the entry to this section",
 		"flag.log_topic":   "link the entry to this topic, as <section>/<topic>",
@@ -150,6 +160,12 @@ func init() {
 		"edit.saved_topic": "Saved the notes of %s.",
 		"edit.saved_entry": "Saved journal entry %s.",
 		"edit.unchanged":   "No changes.",
+
+		"export.done":      "Exported %s: %d sections, %d topics, %d journal entries.",
+		"export.role_only": "Role-only archive: no journal entries and no personal topics.",
+		"import.summary":   "The archive holds the notebook %s: %d sections, %d topics, %d journal entries.",
+		"import.prompt":    "Create a new notebook from it in %s?",
+		"import.done":      "Imported the notebook into %s: %d sections, %d topics, %d journal entries.",
 
 		"ls.no_sections": "No sections yet.",
 		"ls.no_topics":   "No topics.",
@@ -242,6 +258,19 @@ func init() {
 		"err.edited_encoding":          "the edited text is not valid UTF-8 text",
 		"err.recovery_saved":           "your text was saved to %s (only you can read it; delete it when you no longer need it)",
 
+		"err.export_no_file":    "give the name of the archive to write, for example notebook.zip",
+		"err.export_exists":     "the file already exists: choose another name, or add --force to replace it",
+		"err.export_inside":     "the archive cannot be written inside the notebook: choose a file elsewhere",
+		"err.export_target_dir": "that is a directory: give a file name, for example notebook.zip",
+		"err.export_invalid":    "nothing was exported, because a notebook file is not valid: %s",
+		"err.import_not_empty":  "%s already exists and is not empty: import only creates a new notebook, it never merges into or replaces one (choose a new or empty directory with --into)",
+		"err.import_symlink":    "%s is a symbolic link: choose a real directory with --into",
+		"err.confirm_import":    "importing creates a notebook and needs confirmation: run it from a terminal, or add --yes",
+		"err.archive_refused":   "the archive was refused and nothing was written: %s",
+		"err.archive_io":        "cannot read or write the archive: %s",
+		"err.detail.entry":      "entry %s",
+		"err.detail.max":        "limit %d",
+
 		"err.detail.file":  "file %s",
 		"err.detail.files": "files: %s",
 		"err.detail.field": "field %s",
@@ -292,6 +321,23 @@ func init() {
 		"err.code.not_regular_file":         "not a regular file",
 		"err.code.outside_root":             "path is outside the notebook",
 		"err.code.io":                       "input/output error",
+		"err.code.archive_not_regular":      "not a regular file",
+		"err.code.archive_too_large":        "the archive file is too large",
+		"err.code.archive_format":           "not a valid ZIP archive, or it is damaged or inconsistent",
+		"err.code.archive_directory_size":   "the archive's list of entries is too large",
+		"err.code.archive_too_many_entries": "the archive has too many entries",
+		"err.code.archive_total_size":       "the archive is too large once uncompressed",
+		"err.code.archive_entry_size":       "an entry is larger than a notebook file may be",
+		"err.code.archive_ratio":            "an entry is compressed suspiciously well (a possible zip bomb)",
+		"err.code.archive_depth":            "an entry is nested too deeply",
+		"err.code.archive_bad_name":         "an entry has an unsafe or invalid name",
+		"err.code.archive_duplicate":        "two entries have the same name (ignoring case), or a name is both a file and a directory",
+		"err.code.archive_entry_type":       "an entry is a symbolic link, a device or another special file",
+		"err.code.archive_encrypted":        "an entry is encrypted",
+		"err.code.archive_method":           "an entry uses an unsupported compression method",
+		"err.code.archive_exists":           "the file already exists",
+		"err.code.archive_inside_notebook":  "the file would be inside the notebook",
+		"err.code.archive_io":               "input/output error",
 		"err.code.":                         "unknown problem",
 	})
 }

@@ -24,11 +24,17 @@ import (
 // say --yes on purpose. On a terminal it prints prompt on stderr and reads
 // the answer from stdin; anything but an affirmative answer cancels.
 func (a *app) confirm(yes bool, prompt string) error {
+	return a.confirmWith(yes, prompt, "err.confirm_needed")
+}
+
+// confirmWith is confirm with the message key used when there is no
+// terminal and no --yes.
+func (a *app) confirmWith(yes bool, prompt, neededKey string) error {
 	if yes {
 		return nil
 	}
 	if !a.env.Interactive {
-		return a.usagef("err.confirm_needed")
+		return a.usagef(neededKey)
 	}
 	_, _ = io.WriteString(a.env.Stderr, prompt+" "+a.t("confirm.suffix")+" ")
 	var line string

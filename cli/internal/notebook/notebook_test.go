@@ -504,7 +504,7 @@ func snapshot(t *testing.T, dir string) string {
 		}
 		fmt.Fprintf(&b, "%s %v\n", p, d.Type())
 		if d.Type().IsRegular() {
-			data, _ := os.ReadFile(p)
+			data, _ := os.ReadFile(p) //nolint:gosec // G122: test reads its own temp dir
 			b.Write(data)
 			b.WriteByte('\n')
 		}

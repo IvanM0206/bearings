@@ -61,7 +61,11 @@ func newFixture(t *testing.T) string {
 // source) chosen by the caller.
 func buildFixture(t *testing.T, opts *notebook.Options) string {
 	t.Helper()
-	dir := filepath.Join(t.TempDir(), "nb")
+	// Resolve symlinks (macOS temp dirs live under /var -> /private/var):
+	// the notebook root is always reported by its real path.
+	tmp, err := filepath.EvalSymlinks(t.TempDir())
+	must(t, err)
+	dir := filepath.Join(tmp, "nb")
 	nb, err := notebook.Init(dir, notebook.Config{Format: 1, Name: "Example role", Language: "en"}, opts)
 	must(t, err)
 	_, err = nb.AddSection(notebook.NewSection{Slug: "technical", Title: "Technical", Order: intp(0), Description: "Systems and tools."})

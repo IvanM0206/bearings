@@ -176,13 +176,23 @@ func (nb *Notebook) DeleteSection(slug string) error {
 	if err != nil {
 		return err
 	}
+	// Read everything first, so that a file that cannot be read stops the
+	// operation before anything is deleted.
+	type victim struct {
+		rel string
+		v   Version
+	}
+	victims := make([]victim, 0, len(names))
 	for _, name := range names {
 		rel := topicRel(TopicRef{slug, name})
 		data, err := nb.fs.readFile(rel)
 		if err != nil {
 			return err
 		}
-		if err := nb.fs.removeFile(rel, versionOf(data)); err != nil {
+		victims = append(victims, victim{rel, versionOf(data)})
+	}
+	for _, v := range victims {
+		if err := nb.fs.removeFile(v.rel, v.v); err != nil {
 			return err
 		}
 	}
@@ -367,6 +377,18 @@ func (nb *Notebook) MoveTopic(from, to TopicRef) (Topic, error) {
 		}
 	}
 	old := t
+	if to.Section != from.Section {
+		// A topic that changes section goes last in its new one.
+		existing, err := nb.topicsOf(to.Section)
+		if err != nil {
+			return Topic{}, err
+		}
+		t.Order = 0
+		for _, x := range existing {
+			t.Order = max(t.Order, x.Order+1)
+		}
+		t.Order = min(t.Order, MaxOrder)
+	}
 	t.Section, t.Slug = to.Section, to.Topic
 	t.Updated = nb.touch(t.Created)
 	moved, err := nb.writeTopic(t, nil)

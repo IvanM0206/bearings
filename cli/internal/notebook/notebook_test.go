@@ -587,3 +587,99 @@ func TestConcurrentWrites(t *testing.T) {
 		t.Fatal(len(es))
 	}
 }
+
+func TestMoveTopicToOtherSectionGoesLast(t *testing.T) {
+	h := newHarness(t)
+	nb := h.nb
+	must[Section](t)(nb.AddSection(NewSection{Slug: "a", Title: "A"}))
+	must[Section](t)(nb.AddSection(NewSection{Slug: "b", Title: "B"}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "a", Slug: "one", Title: "One"}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "b", Slug: "x", Title: "X"}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "b", Slug: "y", Title: "Y"}))
+	moved := must[Topic](t)(nb.MoveTopic(TopicRef{"a", "one"}, TopicRef{"b", "one"}))
+	if moved.Order != 2 {
+		t.Fatalf("order %d, want 2", moved.Order)
+	}
+}
+
+func orderOf(t *testing.T, nb *Notebook, section string) []string {
+	t.Helper()
+	ts := must[[]Topic](t)(nb.Topics(section))
+	var out []string
+	for _, x := range ts {
+		out = append(out, x.Slug)
+	}
+	return out
+}
+
+func TestReorderTopic(t *testing.T) {
+	h := newHarness(t)
+	nb := h.nb
+	must[Section](t)(nb.AddSection(NewSection{Slug: "a", Title: "A"}))
+	for _, s := range []string{"one", "two", "three"} {
+		must[Topic](t)(nb.AddTopic(NewTopic{Section: "a", Slug: s, Title: s}))
+	}
+	h.now = h.now.Add(time.Hour)
+	moved, err := nb.ReorderTopic(TopicRef{"a", "three"}, -1)
+	if err != nil || !moved {
+		t.Fatal(moved, err)
+	}
+	if got := strings.Join(orderOf(t, nb, "a"), ","); got != "one,three,two" {
+		t.Fatal(got)
+	}
+	untouched := must[Topic](t)(nb.Topic(TopicRef{"a", "one"}))
+	if !untouched.Updated.Equal(t0) {
+		t.Errorf("a topic that did not change must keep `updated`: %v", untouched.Updated)
+	}
+	if moved, _ := nb.ReorderTopic(TopicRef{"a", "one"}, -1); moved {
+		t.Error("first topic moved up")
+	}
+	if moved, _ := nb.ReorderTopic(TopicRef{"a", "two"}, 1); moved {
+		t.Error("last topic moved down")
+	}
+	if _, err := nb.ReorderTopic(TopicRef{"a", "nope"}, 1); CodeOf(err) != CodeNotFound {
+		t.Fatal(err)
+	}
+	if _, err := nb.ReorderTopic(TopicRef{"a", "../x"}, 1); CodeOf(err) != CodeInvalidRef {
+		t.Fatal(err)
+	}
+}
+
+func TestReorderWithEqualOrders(t *testing.T) {
+	h := newHarness(t)
+	nb := h.nb
+	must[Section](t)(nb.AddSection(NewSection{Slug: "a", Title: "A", Order: ptr(5)}))
+	must[Section](t)(nb.AddSection(NewSection{Slug: "b", Title: "B", Order: ptr(5)}))
+	must[Section](t)(nb.AddSection(NewSection{Slug: "c", Title: "C", Order: ptr(5)}))
+	// Sorted by slug: a, b, c. Move c up.
+	moved, err := nb.ReorderSection("c", -1)
+	if err != nil || !moved {
+		t.Fatal(moved, err)
+	}
+	var got []string
+	for _, s := range must[[]Section](t)(nb.Sections()) {
+		got = append(got, s.Slug)
+	}
+	if strings.Join(got, ",") != "a,c,b" {
+		t.Fatal(got)
+	}
+	if _, err := nb.ReorderSection("nope", 1); CodeOf(err) != CodeNotFound {
+		t.Fatal(err)
+	}
+}
+
+
+func TestReorderTopicWithTiesElsewhere(t *testing.T) {
+	h := newHarness(t)
+	nb := h.nb
+	must[Section](t)(nb.AddSection(NewSection{Slug: "a", Title: "A"}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "a", Slug: "a1", Title: "1", Order: ptr(0)}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "a", Slug: "b2", Title: "2", Order: ptr(0)}))
+	must[Topic](t)(nb.AddTopic(NewTopic{Section: "a", Slug: "c3", Title: "3", Order: ptr(1)}))
+	if _, err := nb.ReorderTopic(TopicRef{"a", "c3"}, -1); err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(orderOf(t, nb, "a"), ","); got != "a1,c3,b2" {
+		t.Fatal(got)
+	}
+}

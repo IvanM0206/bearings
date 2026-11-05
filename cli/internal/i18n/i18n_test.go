@@ -72,13 +72,13 @@ func TestTranslator(t *testing.T) {
 	if got := tr.T("no.such.key"); got != "no.such.key" {
 		t.Errorf("missing key = %q, want the key", got)
 	}
-	// A known language without a catalog uses English but keeps its code.
-	es := New("es")
-	if es.Lang() != "es" {
-		t.Errorf("Lang = %q", es.Lang())
+	// A language without a catalog uses English but keeps its code.
+	fr := New("fr")
+	if fr.Lang() != "fr" {
+		t.Errorf("Lang = %q", fr.Lang())
 	}
-	if es.T("common.yes") != tr.T("common.yes") {
-		t.Errorf("es without catalog must fall back to en")
+	if fr.T("common.yes") != tr.T("common.yes") {
+		t.Errorf("fr without catalog must fall back to en")
 	}
 	if got := tr.T("path.title", 1, 2); !strings.Contains(got, "1") || !strings.Contains(got, "2") {
 		t.Errorf("args not formatted: %q", got)

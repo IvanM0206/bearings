@@ -102,7 +102,10 @@ func Execute(args []string, env Env) int {
 		// arguments) are usage errors.
 		ee = &exitError{code: ExitUsage, msg: output.Line(err.Error())}
 	}
-	_, _ = fmt.Fprintf(env.Stderr, "%s: %s\n", a.t("app.name"), ee.msg)
+	// Messages are sanitized where they are built; this is a last line of
+	// defense for arguments echoed back (a reference typed or pasted by
+	// the person, a path) that may carry terminal escape sequences.
+	_, _ = fmt.Fprintf(env.Stderr, "%s: %s\n", a.t("app.name"), output.Text(ee.msg))
 	if ee.code == ExitUsage {
 		_, _ = fmt.Fprintln(env.Stderr, a.t("err.usage_hint"))
 	}

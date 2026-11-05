@@ -35,6 +35,11 @@ const (
 // to simulate a failure at the last moment.
 var testHookBeforeRename func(tmpPath string) error
 
+// testHookBeforePlace, if set, is called after the last conflict check and
+// right before the temporary file is moved to target. Tests use it to win
+// the race against that check.
+var testHookBeforePlace func(target string)
+
 type fsys struct {
 	root string // absolute, symlink-free, cleaned
 }
@@ -336,10 +341,36 @@ func (f *fsys) writeFile(rel string, data []byte, expect *Version) (err error) {
 	if err = f.checkCurrent(rel, expect); err != nil {
 		return err
 	}
-	if err = os.Rename(tmpPath, target); err != nil {
-		return ioErr(rel, err)
+	if testHookBeforePlace != nil {
+		testHookBeforePlace(target)
+	}
+	if err = place(tmpPath, target, rel, expect == nil); err != nil {
+		return err
 	}
 	syncDir(filepath.Dir(target))
+	return nil
+}
+
+// place moves the finished temporary file to target. For a new file
+// (noReplace) it uses a hard link, which fails if target appeared after
+// the last check, so a file created concurrently by another program is
+// never silently replaced; the temporary name is then removed. File
+// systems without hard links fall back to a rename, already guarded by
+// the check just before.
+func place(tmpPath, target, rel string, noReplace bool) error {
+	if noReplace {
+		err := os.Link(tmpPath, target)
+		if err == nil {
+			_ = os.Remove(tmpPath)
+			return nil
+		}
+		if errors.Is(err, fs.ErrExist) {
+			return newErr(CodeExists, rel, "")
+		}
+	}
+	if err := os.Rename(tmpPath, target); err != nil {
+		return ioErr(rel, err)
+	}
 	return nil
 }
 

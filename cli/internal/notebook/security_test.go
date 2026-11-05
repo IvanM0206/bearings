@@ -389,3 +389,29 @@ func TestFileSizeLimitOnDisk(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// A file created by another program between the last check and the final
+// move must not be replaced by a create.
+func TestCreateDoesNotReplaceConcurrentFile(t *testing.T) {
+	h := newHarness(t)
+	must[Section](t)(h.nb.AddSection(NewSection{Slug: "tech", Title: "Tech"}))
+	other := []byte("---\ntheirs\n---\n")
+	testHookBeforePlace = func(target string) {
+		if err := os.WriteFile(target, other, 0o600); err != nil {
+			t.Error(err)
+		}
+	}
+	defer func() { testHookBeforePlace = nil }()
+	_, err := h.nb.AddTopic(NewTopic{Section: "tech", Slug: "race", Title: "Mine"})
+	if CodeOf(err) != CodeExists {
+		t.Fatalf("expected exists, got %v", err)
+	}
+	got, err := os.ReadFile(h.path("sections/tech/race.md"))
+	if err != nil || !bytes.Equal(got, other) {
+		t.Fatalf("their file was replaced: %q, %v", got, err)
+	}
+	tmps, _ := filepath.Glob(h.path("sections/tech/" + tmpGlob))
+	if len(tmps) != 0 {
+		t.Fatalf("temporary files left behind: %v", tmps)
+	}
+}

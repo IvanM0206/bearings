@@ -86,10 +86,10 @@ func splitCommand(s string, escapes bool) ([]string, error) {
 				cur.WriteRune(r)
 			}
 		case quote == '"':
-			switch {
-			case r == '"':
+			switch r {
+			case '"':
 				quote = 0
-			case r == '\\':
+			case '\\':
 				escaped = true
 			default:
 				cur.WriteRune(r)
@@ -148,14 +148,12 @@ func (a *app) editText(fileName string, initial string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// MkdirTemp creates the directory with mode 0700.
 	dir, err := os.MkdirTemp("", "bearings-edit-*")
 	if err != nil {
 		return "", &exitError{code: ExitFailure, msg: a.t("err.temp_dir")}
 	}
 	defer func() { _ = os.RemoveAll(dir) }()
-	if err := os.Chmod(dir, 0o700); err != nil {
-		return "", &exitError{code: ExitFailure, msg: a.t("err.temp_dir")}
-	}
 	path := filepath.Join(dir, fileName)
 	if err := writeNew(path, []byte(initial)); err != nil {
 		return "", &exitError{code: ExitFailure, msg: a.t("err.temp_dir")}
@@ -244,11 +242,9 @@ func (a *app) readEdited(path string) (string, error) {
 // directory, so that a failed save does not lose their work. It returns
 // the path.
 func saveRecovery(fileName, text string) (string, error) {
+	// MkdirTemp creates the directory with mode 0700.
 	dir, err := os.MkdirTemp("", "bearings-recovery-*")
 	if err != nil {
-		return "", err
-	}
-	if err := os.Chmod(dir, 0o700); err != nil {
 		return "", err
 	}
 	path := filepath.Join(dir, fileName)

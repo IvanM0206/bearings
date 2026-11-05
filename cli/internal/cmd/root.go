@@ -38,6 +38,8 @@ func (a *app) newRoot() *cobra.Command {
 
 	root.AddCommand(
 		a.newInit(),
+		a.newLog(),
+		a.newEdit(),
 		a.newSection(),
 		a.newTopic(),
 		a.newAdvance(),

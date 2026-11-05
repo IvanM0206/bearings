@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -102,7 +103,8 @@ func TestEditorArgs(t *testing.T) {
 				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
 					t.Fatalf("err = %v, want %q", err, tt.wantErr)
 				}
-				if ee, ok := err.(*exitError); !ok || ee.code != ExitUsage {
+				var ee *exitError
+				if !errors.As(err, &ee) || ee.code != ExitUsage {
 					t.Errorf("want a usage error, got %v", err)
 				}
 				return
@@ -144,7 +146,8 @@ func TestConfirm(t *testing.T) {
 					t.Fatal(err)
 				}
 			} else {
-				ee, ok := err.(*exitError)
+				var ee *exitError
+				ok := errors.As(err, &ee)
 				if !ok || ee.code != tt.wantCode || !strings.Contains(ee.msg, tt.wantMsg) {
 					t.Fatalf("got %v, want code %d containing %q", err, tt.wantCode, tt.wantMsg)
 				}

@@ -67,6 +67,9 @@ func init() {
 		"cmd.import.short": "Create a notebook from a ZIP archive",
 		"cmd.import.long":  "Creates a new notebook from an archive made by 'bearings export' or the web app. The archive is checked completely before anything is written (unsafe names, links, encrypted entries, zip bombs and every notebook file); if anything is wrong, nothing is created. The notebook is created in --into, or else in the notebook location (--notebook, BEARINGS_NOTEBOOK or ~/bearings), which must be empty or not exist: import never merges into or overwrites a notebook. It shows what the archive holds and asks for confirmation on a terminal; scripts must pass --yes.",
 
+		"cmd.sync.short": "Commit the notebook to git and sync it with its remote",
+		"cmd.sync.long":  "Commits the changed notebook files (bearings.yaml, sections and journal; nothing else) with a fixed message and the time. If the branch has an upstream, it then pulls with rebase and pushes. The notebook directory must be the top level of its own git repository; use a private remote, since the notebook holds your work notes. On a conflict it stops and shows the git commands to look at it and to continue or abort; it never resolves, resets or force-pushes anything. git hooks and fsmonitor never run during sync, and it refuses repositories whose own configuration could run programs or redirect your data. --dry-run shows what would be committed. See docs/sync.md.",
+
 		// Flags.
 		"flag.notebook":      "notebook directory (default: $BEARINGS_NOTEBOOK, else ~/bearings)",
 		"flag.json":          "print the result as JSON",
@@ -104,6 +107,9 @@ func init() {
 		"flag.role_only":  "leave out the journal and personal topics (a guide or template to share)",
 		"flag.into":       "directory for the new notebook (default: the notebook location)",
 		"flag.yes_import": "import without asking (needed in scripts)",
+
+		"flag.dry_run": "show what would be committed and synced, without changing anything",
+		"flag.verbose": "also show which git is used, and its version",
 
 		"flag.log_section": "link the entry to this section",
 		"flag.log_topic":   "link the entry to this topic, as <section>/<topic>",
@@ -166,6 +172,20 @@ func init() {
 		"import.summary":   "The archive holds the notebook %s: %d sections, %d topics, %d journal entries.",
 		"import.prompt":    "Create a new notebook from it in %s?",
 		"import.done":      "Imported the notebook into %s: %d sections, %d topics, %d journal entries.",
+
+		"sync.git_version":     "Using git %s (%s).",
+		"sync.no_changes":      "No changes to commit.",
+		"sync.dry_header":      "Changed notebook files that would be committed (%d):",
+		"sync.change.added":    "added",
+		"sync.change.modified": "modified",
+		"sync.change.deleted":  "deleted",
+		"sync.dry_upstream":    "Then it would pull (with rebase) from %s and push to it.",
+		"sync.dry_no_upstream": "The branch has no upstream: it would only commit.",
+		"sync.committed":       "Committed %d changed files (%s).",
+		"sync.no_upstream":     "The branch has no upstream, so nothing was pulled or pushed. To add a private remote and push to it: git -C %[1]s remote add origin <url> && git -C %[1]s push -u origin HEAD",
+		"sync.synced":          "Synced with %s.",
+		"sync.git_said":        "git said:",
+		"warn.git_neutralized": "warning: the repository sets %s; bearings sync ignores it (hooks and fsmonitor never run during sync)",
 
 		"ls.no_sections": "No sections yet.",
 		"ls.no_topics":   "No topics.",
@@ -270,6 +290,17 @@ func init() {
 		"err.archive_io":        "cannot read or write the archive: %s",
 		"err.detail.entry":      "entry %s",
 		"err.detail.max":        "limit %d",
+
+		"err.git_missing":        "git is not installed or not on PATH; install git to use 'bearings sync'",
+		"err.git_old":            "git %s is too old: 'bearings sync' needs git %s or later",
+		"err.not_git_repo":       "the notebook at %[1]s is not a git repository. To set one up, use a PRIVATE remote (your notes are private):\n  git -C %[2]s init\n  bearings sync\n  git -C %[2]s remote add origin <url of a private repository>\n  git -C %[2]s push -u origin HEAD\nAfter that, 'bearings sync' commits, pulls and pushes.",
+		"err.not_git_toplevel":   "the notebook at %s is inside the git repository %s instead of being the top level of its own; 'bearings sync' only works on a repository of its own (run git init in the notebook directory)",
+		"err.git_unsafe_config":  "refusing to sync: the repository's own git configuration sets %s, which can run programs or send your notes elsewhere. If you did not set it yourself (for example, the directory came from someone else), remove it; if you did, move it to your global configuration (git config --global). Inspect it with: git -C %s config --local --list --show-origin",
+		"err.git_rebase_stopped": "pulling from %[1]s stopped: your changes conflict with changes on the remote. Nothing was pushed, and git has left the repository in the middle of a rebase, as it is. To look at it:\n  git -C %[2]s status\n  git -C %[2]s diff\nTo continue: edit the conflicting files, then\n  git -C %[2]s add <file>\n  git -C %[2]s rebase --continue\nand run 'bearings sync' again. To give up and go back to your own version:\n  git -C %[2]s rebase --abort",
+		"err.git_in_progress":    "git is in the middle of a rebase or merge in this repository; finish it first, nothing was done. See where it stands with:\n  git -C %[1]s status\nthen either fix the files, git -C %[1]s add <file> and git -C %[1]s rebase --continue (or merge --continue), or give up with git -C %[1]s rebase --abort (or merge --abort). Then run 'bearings sync' again.",
+		"err.git_pull_failed":    "pulling from %[1]s failed; nothing was pushed. Check with: git -C %[2]s status",
+		"err.git_push_failed":    "pushing to %[1]s failed; your commits are kept locally. If the remote has new changes, run 'bearings sync' again. Check with: git -C %[2]s status",
+		"err.git_failed":         "git %s failed",
 
 		"err.detail.file":  "file %s",
 		"err.detail.files": "files: %s",

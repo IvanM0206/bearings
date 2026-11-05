@@ -3,6 +3,7 @@ package main
 
 import (
 	"os"
+	"os/exec"
 
 	"github.com/IvanM0206/bearings/cli/internal/cmd"
 )
@@ -15,6 +16,8 @@ func main() {
 		Interactive: isTerminal(os.Stdin) && isTerminal(os.Stderr),
 		Getenv:      os.Getenv,
 		UserHomeDir: os.UserHomeDir,
+		Environ:     os.Environ,
+		LookPath:    exec.LookPath,
 	}))
 }
 

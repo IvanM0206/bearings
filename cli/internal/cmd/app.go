@@ -51,6 +51,11 @@ type Env struct {
 	UserHomeDir func() (string, error)
 	// Now returns the current time; nil means time.Now. Tests set it.
 	Now func() time.Time
+	// Environ returns the environment passed on to programs the CLI runs
+	// (git), in os.Environ form; nil means an empty environment.
+	Environ func() []string
+	// LookPath finds a program on PATH; nil means exec.LookPath.
+	LookPath func(string) (string, error)
 }
 
 // exitError is an error with a user-facing message and an exit code.

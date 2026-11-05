@@ -52,6 +52,7 @@ func (a *app) newRoot() *cobra.Command {
 		a.newPath(),
 		a.newExport(),
 		a.newImport(),
+		a.newSync(),
 	)
 	return root
 }

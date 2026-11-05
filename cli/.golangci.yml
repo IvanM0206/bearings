@@ -27,6 +27,14 @@ linters:
         - name: var-naming
         - name: indent-error-flow
         - name: error-strings
+    misspell:
+      # Spanish words in the es catalog that the English spell checker
+      # flags; they are correct Spanish.
+      ignore-rules:
+        - comando
+        - programas
+        - comandos
+        - argumentos
     nolintlint:
       require-explanation: true
       require-specific: true

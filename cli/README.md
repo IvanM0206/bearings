@@ -12,7 +12,7 @@ Language: English. [Leer en español](README.es.md).
 
 ## Install
 
-You need Go 1.25 or later (see `go.mod`).
+You need Go 1.27 or later (see `go.mod`).
 
 From the Go module proxy:
 

@@ -184,7 +184,8 @@ func TestSectionRm(t *testing.T) {
 		_ = filepath.WalkDir(filepath.Join(dir, "journal"), func(p string, d os.DirEntry, err error) error {
 			must(t, err)
 			if !d.IsDir() {
-				if b, _ := os.ReadFile(p); strings.Contains(string(b), "technical") {
+				b, _ := os.ReadFile(p) //nolint:gosec // G122: test reads its own temp dir
+				if strings.Contains(string(b), "technical") {
 					t.Errorf("%s still mentions the section", p)
 				}
 			}

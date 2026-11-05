@@ -32,16 +32,16 @@ func main() {
 const maxFile = 1 << 20
 
 func run(src, dst string) error {
-	if fi, err := os.Lstat(src); err != nil || !fi.IsDir() {
+	if fi, err := os.Lstat(src); err != nil || !fi.IsDir() { //nolint:gosec // G703: dev-time generator, paths come from go:generate
 		return fmt.Errorf("source %q is not a directory", src)
 	}
-	if err := os.RemoveAll(dst); err != nil {
+	if err := os.RemoveAll(dst); err != nil { //nolint:gosec // G703: dev-time generator, paths come from go:generate
 		return err
 	}
-	if err := os.MkdirAll(dst, 0o755); err != nil { //nolint:gosec // G301: generated source tree, committed to the repository
+	if err := os.MkdirAll(dst, 0o755); err != nil { //nolint:gosec // G301,G703: generated source tree, committed to the repository
 		return err
 	}
-	return filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error {
+	return filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error { //nolint:gosec // G703: dev-time generator, paths come from go:generate
 		if err != nil {
 			return err
 		}
@@ -74,6 +74,6 @@ func run(src, dst string) error {
 		if len(data) > maxFile {
 			return errors.New(rel + ": file too large")
 		}
-		return os.WriteFile(out, data, 0o644) //nolint:gosec // G306: generated source file, committed to the repository
+		return os.WriteFile(out, data, 0o644) //nolint:gosec // G306,G703: generated source file, committed to the repository
 	})
 }

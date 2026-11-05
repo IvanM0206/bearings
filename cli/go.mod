@@ -1,8 +1,8 @@
 module github.com/IvanM0206/bearings/cli
 
-go 1.25.0
+go 1.27.0
 
-toolchain go1.25.14
+toolchain go1.27.3
 
 require (
 	github.com/google/jsonschema-go v0.4.3

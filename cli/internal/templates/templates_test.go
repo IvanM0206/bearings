@@ -65,7 +65,7 @@ func TestEmbeddedCopyIsUpToDate(t *testing.T) {
 			return err
 		}
 		rel, _ := filepath.Rel(src, p)
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(p) //nolint:gosec // G122: test reads the repository templates
 		want[filepath.ToSlash(rel)] = data
 		return err
 	})

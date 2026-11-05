@@ -287,6 +287,14 @@ func (a *app) notebookDir() (string, error) {
 	return filepath.Join(home, "bearings"), nil
 }
 
+// now returns the current time, as set by the environment.
+func (a *app) now() time.Time {
+	if a.env.Now != nil {
+		return a.env.Now()
+	}
+	return time.Now()
+}
+
 func (a *app) nbOptions() *notebook.Options {
 	return &notebook.Options{OnProblem: a.warn, Now: a.env.Now}
 }

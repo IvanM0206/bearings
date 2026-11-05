@@ -15,6 +15,8 @@ func init() {
 		// Command descriptions.
 		"cmd.root.short":     "Record what you learn in a new role, and look it up later",
 		"cmd.root.long":      "Bearings keeps a notebook of what you learn in a new role: sections and topics with a status, a dated journal, and a role path that becomes a guide for whoever takes the role next.\n\nThe notebook is a directory of Markdown files. Choose it with --notebook or BEARINGS_NOTEBOOK; the default is ~/bearings.",
+		"cmd.init.short":     "Create a notebook",
+		"cmd.init.long":      "Creates a new notebook in an empty or non-existent directory (--notebook, BEARINGS_NOTEBOOK or ~/bearings). With --template, it starts from a built-in template; without it, the notebook is blank. Templates are part of the program and are never downloaded. Topics that come from a template are marked as suggested until you review them. Use --list-templates to see the templates.",
 		"cmd.ls.short":       "List sections, or the topics of a section",
 		"cmd.ls.long":        "Without arguments, lists the sections with the number of mastered topics out of the total. With a section, lists its topics with status and type; --status and --type filter them.",
 		"cmd.show.short":     "Show a topic with its notes, resources and journal entries",
@@ -42,7 +44,16 @@ func init() {
 		"flag.section":       "only entries linked to this section",
 		"flag.md":            "print a Markdown guide that can be shared",
 
+		"flag.template":       "start from this built-in template (see --list-templates)",
+		"flag.name":           "display name of the notebook (1 to 80 characters)",
+		"flag.language":       "language of the notebook: en or es (default: the template's, else your language)",
+		"flag.list_templates": "list the built-in templates and exit",
+
 		// Table columns.
+		"col.id":        "ID",
+		"col.language":  "LANGUAGE",
+		"col.sections":  "SECTIONS",
+		"col.topics":    "TOPICS",
 		"col.section":   "SECTION",
 		"col.topic":     "TOPIC",
 		"col.title":     "TITLE",
@@ -55,6 +66,11 @@ func init() {
 		"col.match":     "MATCH",
 
 		// Command output.
+		"init.created":       "Created a notebook in %s",
+		"init.from_template": "Template %s: %d sections, %d topics.",
+		"init.review_hint":   "Topics from a template are marked as suggested; review them with 'bearings ls <section>'.",
+		"init.next":          "Next: 'bearings ls' to see it, 'bearings log \"what you learned\"' to write your first entry.",
+
 		"ls.no_sections": "No sections yet.",
 		"ls.no_topics":   "No topics.",
 
@@ -112,6 +128,10 @@ func init() {
 
 		"confirm.suffix":       "[y/N]",
 		"confirm.yes_answers":  "y,yes",
+		"err.empty_name":       "--name must not be empty",
+		"err.control_in_name":  "--name must not contain control characters",
+		"err.unknown_template": "unknown template %q (available: %s)",
+		"err.init_not_empty":   "%s already exists and is not empty: choose a new or empty directory (a notebook is never created over existing files)",
 		"err.confirm_needed":   "this deletes data and needs confirmation: run it from a terminal, or add --yes",
 		"err.cancelled":        "cancelled; nothing was changed",
 		"err.no_editor":        "no editor configured: set $VISUAL or $EDITOR, for example: export EDITOR=nano",

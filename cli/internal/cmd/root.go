@@ -37,6 +37,7 @@ func (a *app) newRoot() *cobra.Command {
 	f.BoolVar(&a.noColor, "no-color", false, a.t("flag.no_color"))
 
 	root.AddCommand(
+		a.newInit(),
 		a.newLs(),
 		a.newShow(),
 		a.newSearch(),

@@ -70,6 +70,9 @@ func init() {
 		"cmd.sync.short": "Confirma el cuaderno en git y lo sincroniza con su remoto",
 		"cmd.sync.long":  "Confirma los archivos del cuaderno que cambiaron (bearings.yaml, las secciones y la bitácora; nada más) con un mensaje fijo y la hora. Si la rama tiene upstream, después hace pull con rebase y push. El directorio del cuaderno debe ser el nivel superior de su propio repositorio git; usa un remoto privado, porque el cuaderno guarda tus notas de trabajo. Ante un conflicto se detiene y muestra los comandos de git para revisarlo y para continuar o cancelar; nunca resuelve, reinicia ni hace un push forzado. Los hooks de git y fsmonitor nunca se ejecutan durante sync, y se rechazan los repositorios cuya propia configuración podría ejecutar programas o redirigir tus datos. --dry-run muestra qué se confirmaría. Consulta docs/sync.es.md.",
 
+		"cmd.mcp.short": "Ejecuta el servidor MCP local para asistentes de IA (stdio)",
+		"cmd.mcp.long":  "Ejecuta un servidor Model Context Protocol en la entrada y salida estándar, para que un asistente de IA como Claude Code o Claude Desktop pueda leer el cuaderno. El cuaderno (--notebook, BEARINGS_NOTEBOOK o ~/bearings) queda fijo al iniciar el servidor. Es de solo lectura salvo que pases --allow-write, que agrega herramientas para añadir entradas de bitácora y temas, cambiar el estado de un tema y agregar texto a las notas de un tema; no se puede borrar nada. No abre ningún puerto de red. Los registros van a stderr y nunca contienen el contenido de las notas. Consulta docs/mcp.es.md.",
+
 		// Flags.
 		"flag.notebook":      "directorio del cuaderno (por defecto: $BEARINGS_NOTEBOOK; si no, ~/bearings)",
 		"flag.json":          "imprime el resultado como JSON",
@@ -91,6 +94,8 @@ func init() {
 
 		"flag.description": "descripción de la sección (hasta 2000 caracteres)",
 		"flag.yes":         "confirma sin preguntar (necesario en scripts)",
+		"flag.allow_write": "registra también las herramientas que escriben en el cuaderno (no se puede borrar nada)",
+		"flag.log_level":   "nivel de detalle de los registros en stderr: error, warn, info, debug",
 		"flag.up":          "mueve un lugar hacia arriba",
 		"flag.down":        "mueve un lugar hacia abajo",
 
@@ -226,6 +231,7 @@ func init() {
 		"err.usage_hint":           "Ejecuta 'bearings --help' para ver el uso.",
 		"err.unknown_command":      "comando desconocido %q",
 		"err.unknown_language":     "idioma desconocido %q (disponibles: %s)",
+		"err.bad_log_level":        "nivel de registro desconocido %q (disponibles: error, warn, info, debug)",
 		"err.no_home":              "no se encuentra tu directorio personal; usa --notebook o BEARINGS_NOTEBOOK",
 		"err.no_notebook":          "no se encontró un cuaderno en %s (elige uno con --notebook o BEARINGS_NOTEBOOK)",
 		"err.bad_section":          "sección no válida %q: usa el nombre de la sección tal como lo muestra 'bearings ls' (letras minúsculas, dígitos y guiones)",

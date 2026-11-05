@@ -70,6 +70,9 @@ func init() {
 		"cmd.sync.short": "Commit the notebook to git and sync it with its remote",
 		"cmd.sync.long":  "Commits the changed notebook files (bearings.yaml, sections and journal; nothing else) with a fixed message and the time. If the branch has an upstream, it then pulls with rebase and pushes. The notebook directory must be the top level of its own git repository; use a private remote, since the notebook holds your work notes. On a conflict it stops and shows the git commands to look at it and to continue or abort; it never resolves, resets or force-pushes anything. git hooks and fsmonitor never run during sync, and it refuses repositories whose own configuration could run programs or redirect your data. --dry-run shows what would be committed. See docs/sync.md.",
 
+		"cmd.mcp.short": "Run the local MCP server for AI assistants (stdio)",
+		"cmd.mcp.long":  "Runs a Model Context Protocol server on stdin and stdout, so that an AI assistant such as Claude Code or Claude Desktop can read the notebook. The notebook (--notebook, BEARINGS_NOTEBOOK or ~/bearings) is fixed when the server starts. It is read-only unless you pass --allow-write, which adds tools to add journal entries and topics, set a topic's status and append to a topic's notes; nothing can be deleted. There is no network listener. Logs go to stderr and never contain note content. See docs/mcp.md.",
+
 		// Flags.
 		"flag.notebook":      "notebook directory (default: $BEARINGS_NOTEBOOK, else ~/bearings)",
 		"flag.json":          "print the result as JSON",
@@ -91,6 +94,8 @@ func init() {
 
 		"flag.description": "description of the section (up to 2000 characters)",
 		"flag.yes":         "confirm without asking (needed in scripts)",
+		"flag.allow_write": "also register the tools that write to the notebook (nothing can be deleted)",
+		"flag.log_level":   "log detail on stderr: error, warn, info, debug",
 		"flag.up":          "move one place up",
 		"flag.down":        "move one place down",
 
@@ -226,6 +231,7 @@ func init() {
 		"err.usage_hint":           "Run 'bearings --help' for usage.",
 		"err.unknown_command":      "unknown command %q",
 		"err.unknown_language":     "unknown language %q (available: %s)",
+		"err.bad_log_level":        "unknown log level %q (available: error, warn, info, debug)",
 		"err.no_home":              "cannot find your home directory; use --notebook or BEARINGS_NOTEBOOK",
 		"err.no_notebook":          "no notebook found at %s (choose one with --notebook or BEARINGS_NOTEBOOK)",
 		"err.bad_section":          "invalid section %q: use the section's name as shown by 'bearings ls' (lowercase letters, digits and hyphens)",

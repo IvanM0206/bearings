@@ -106,6 +106,16 @@ func TestSpanishConfirmAnswers(t *testing.T) {
 	if !found {
 		t.Errorf("no Spanish affirmative answer in %v", answers)
 	}
+	// English answers are accepted too, so "y" works whatever the language.
+	for _, want := range []string{"y", "yes"} {
+		ok := false
+		for _, a := range answers {
+			ok = ok || a == want
+		}
+		if !ok {
+			t.Errorf("%q is not accepted in %v", want, answers)
+		}
+	}
 }
 
 func TestVerbsHelper(t *testing.T) {

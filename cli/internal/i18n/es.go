@@ -249,7 +249,7 @@ func init() {
 		"warn.skipped":             "advertencia: se omitió %s (%s)",
 
 		"confirm.suffix":               "[s/N]",
-		"confirm.yes_answers":          "s,si,sí",
+		"confirm.yes_answers":          "s,si,sí,y,yes",
 		"err.empty_name":               "--name no debe estar vacío",
 		"err.control_in_name":          "--name no debe contener caracteres de control",
 		"err.unknown_template":         "plantilla desconocida %q (disponibles: %s)",

@@ -1,0 +1,12 @@
+exit 0
+--- stdout
+2026-11-03
+  [gh30fjcb9m] technical/backtesting
+    The simulator skips days without data.
+  [t29585eqk5] team
+    Standup is at ten.
+
+2026-10-20
+  [3kfa0rh3wp]
+    First day: got access to the wiki.
+--- stderr

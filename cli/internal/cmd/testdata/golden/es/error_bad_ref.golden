@@ -1,0 +1,5 @@
+exit 2
+--- stdout
+--- stderr
+bearings: referencia de tema no válida "backtesting": usa <section>/<topic>, por ejemplo technical/backtesting
+Ejecuta 'bearings --help' para ver el uso.

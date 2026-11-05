@@ -1,0 +1,6 @@
+exit 0
+--- stdout
+FOUND IN       WHERE                  MATCH
+topic notes    technical/backtesting  …oad the sample data first. Then run the simulator.
+journal entry  2026-11-03 gh30fjcb9m  The simulator skips days without data.
+--- stderr

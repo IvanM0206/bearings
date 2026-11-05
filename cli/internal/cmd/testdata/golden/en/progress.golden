@@ -1,0 +1,14 @@
+exit 0
+--- stdout
+Progress
+
+Technical   [######--------------]  1/3   33%
+Team        [##########----------]  1/2   50%
+
+All topics  [########------------]  2/5   40%
+Role path   [##########----------]  2/4   50%
+Personal    [--------------------]  0/1    0%
+
+Suggested topics not reviewed yet: 1
+Journal entries: 3
+--- stderr

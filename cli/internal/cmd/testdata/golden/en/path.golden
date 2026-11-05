@@ -1,0 +1,12 @@
+exit 0
+--- stdout
+Role path (2 of 4 mastered)
+
+Technical
+    1. Backtesting  (in progress)
+  ✓ 2. Risk limits  (mastered)
+
+Team
+    3. Team rituals  (pending)
+  ✓ 4. Who is who  (mastered)
+--- stderr

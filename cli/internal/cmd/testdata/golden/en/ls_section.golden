@@ -1,0 +1,10 @@
+exit 0
+--- stdout
+Technical (technical)
+Systems and tools.
+
+TOPIC        TITLE                 STATUS       TYPE      SUGGESTED
+backtesting  Backtesting           in progress  role
+risk         Risk limits           mastered     role
+scratch      My private shortcuts  pending      personal  yes
+--- stderr

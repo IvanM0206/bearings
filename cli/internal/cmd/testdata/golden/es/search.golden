@@ -1,0 +1,6 @@
+exit 0
+--- stdout
+ENCONTRADO EN        DÓNDE                  COINCIDENCIA
+notas del tema       technical/backtesting  …oad the sample data first. Then run the simulator.
+entrada de bitácora  2026-11-03 gh30fjcb9m  The simulator skips days without data.
+--- stderr

@@ -1,0 +1,12 @@
+exit 0
+--- stdout
+Ruta del rol (2 de 4 dominados)
+
+Technical
+    1. Backtesting  (en curso)
+  ✓ 2. Risk limits  (dominado)
+
+Team
+    3. Team rituals  (pendiente)
+  ✓ 4. Who is who  (dominado)
+--- stderr

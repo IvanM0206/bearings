@@ -1,0 +1,52 @@
+version: "2"
+
+run:
+  tests: true
+
+linters:
+  default: standard # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - gosec
+    - bodyclose
+    - errorlint
+    - misspell
+    - nolintlint
+    - revive
+    - unconvert
+    - copyloopvar
+    - predeclared
+  settings:
+    gosec:
+      # Every finding is reviewed; exclusions below are justified one by one.
+      severity: low
+      confidence: low
+    revive:
+      rules:
+        - name: exported
+        - name: package-comments
+        - name: var-naming
+        - name: indent-error-flow
+        - name: error-strings
+    misspell:
+      # Spanish words in the es catalog that the English spell checker
+      # flags; they are correct Spanish.
+      ignore-rules:
+        - comando
+        - programas
+        - comandos
+        - argumentos
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    presets:
+      - std-error-handling
+    rules:
+      # Tests create fixtures with explicit paths and modes.
+      - path: _test\.go
+        linters: [gosec]
+        text: "G301|G302|G304|G306"
+
+formatters:
+  enable:
+    - gofmt

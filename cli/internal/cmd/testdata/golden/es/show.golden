@@ -1,0 +1,23 @@
+exit 0
+--- stdout
+Backtesting
+technical/backtesting  -  Technical
+
+Estado:    en curso
+Tipo:      rol
+Sugerido: no
+Creado:    2026-11-03T12:00:00Z
+Actualizado: 2026-11-03T12:00:00Z
+
+Recursos
+  - Backtesting guide  https://example.com/wiki/backtesting
+  - https://example.com/plain
+
+Notas
+  Download the sample data first.
+  Then run the simulator.
+
+Entradas de bitácora (1)
+  2026-11-03  [gh30fjcb9m]
+    The simulator skips days without data.
+--- stderr

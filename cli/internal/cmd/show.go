@@ -80,7 +80,7 @@ func (a *app) runShow(arg string) error {
 	if strings.TrimSpace(t.Notes) == "" {
 		p.println("  " + a.style.Dim(a.t("common.none")))
 	} else {
-		p.println(indent(output.Text(strings.TrimRight(t.Notes, "\n")), "  "))
+		p.println(indent(a.wrapText(output.Text(strings.TrimRight(t.Notes, "\n")), 2), "  "))
 	}
 
 	p.println("")
@@ -90,7 +90,7 @@ func (a *app) runShow(arg string) error {
 	}
 	for _, e := range entries {
 		p.printf("  %s  [%s]\n", e.Date, e.ID)
-		p.println(indent(output.Text(strings.TrimRight(e.Body, "\n")), "    "))
+		p.println(indent(a.wrapText(output.Text(strings.TrimRight(e.Body, "\n")), 4), "    "))
 	}
 	return p.err
 }

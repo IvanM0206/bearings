@@ -175,6 +175,18 @@ func TestExportRoleOnly(t *testing.T) {
 	if r := run(t, dst, "ls", "technical"); strings.Contains(r.stdout, "scratch") {
 		t.Errorf("%q", r.stdout)
 	}
+	r = runIn(t, dst, "ls", "technical", "--json")
+	wantOK(t, r)
+	topics, _ := decode(t, r.stdout)["topics"].([]any)
+	if len(topics) != 2 {
+		t.Fatalf("want 2 topics in technical: %s", r.stdout)
+	}
+	for _, tp := range topics {
+		m := tp.(map[string]any)
+		if m["status"] != "pending" || m["suggested"] != true {
+			t.Errorf("progress kept: %v", m)
+		}
+	}
 }
 
 func TestImportRefusesExistingNotebook(t *testing.T) {

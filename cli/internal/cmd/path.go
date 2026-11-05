@@ -124,7 +124,7 @@ func (a *app) pathMarkdown(nb *notebook.Notebook, cfg notebook.Config, steps []n
 			p.println("## " + output.Line(sec.Title))
 			if d := strings.TrimSpace(output.Text(sec.Description)); d != "" {
 				p.println("")
-				p.println(d)
+				p.println(a.wrapText(d, 0))
 			}
 		}
 		p.println("")

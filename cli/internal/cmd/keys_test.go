@@ -150,3 +150,26 @@ func TestEveryNotebookErrorCodeHasAMessage(t *testing.T) {
 		t.Fatalf("found only %d codes; the scanner is probably broken", n)
 	}
 }
+
+func TestTerminalWidth(t *testing.T) {
+	for _, tt := range []struct {
+		cols string
+		want int
+	}{{"", 80}, {"120", 120}, {"abc", 80}, {"5", 80}, {"-3", 80}, {"99999", 80}} {
+		got := terminalWidth(func(string) string { return tt.cols })
+		if got != tt.want {
+			t.Errorf("COLUMNS=%q: got %d, want %d", tt.cols, got, tt.want)
+		}
+	}
+}
+
+func TestNoWrapWhenNotTerminal(t *testing.T) {
+	src := newFixture(t)
+	long := strings.Repeat("word ", 40)
+	wantOK(t, run(t, src, "log", strings.TrimSpace(long), "-s", "team"))
+	r := runOpts(t, opts{env: map[string]string{"BEARINGS_NOTEBOOK": src, "COLUMNS": "40"}}, "journal")
+	wantOK(t, r)
+	if !strings.Contains(r.stdout, strings.TrimSpace(long)) {
+		t.Errorf("output wrapped although not a terminal: %q", r.stdout)
+	}
+}

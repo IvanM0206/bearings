@@ -18,7 +18,9 @@ import (
 
 // Options configures an export.
 type Options struct {
-	// RoleOnly leaves out the journal and every topic of type personal, so
+	// RoleOnly leaves out the journal and every topic of type personal, sets
+	// every remaining topic to pending and suggested (keeping notes,
+	// resources, titles, order, created and updated), so
 	// the archive can be shared as a guide or a template.
 	RoleOnly bool
 }
@@ -56,9 +58,12 @@ func Prepare(files map[string][]byte, opts Options) (*Plan, error) {
 		return nil, err
 	}
 	personal := map[notebook.TopicRef]bool{}
+	role := map[notebook.TopicRef]notebook.Topic{}
 	for _, t := range tree.Topics {
 		if t.Type == notebook.TypePersonal {
 			personal[t.Ref()] = true
+		} else {
+			role[t.Ref()] = t
 		}
 	}
 	p := &Plan{files: map[string][]byte{}}
@@ -78,6 +83,16 @@ func Prepare(files map[string][]byte, opts Options) (*Plan, error) {
 		case notebook.PathTopic:
 			if opts.RoleOnly && personal[notebook.TopicRef{Section: info.Section, Topic: info.Topic}] {
 				continue
+			}
+			if t, ok := role[notebook.TopicRef{Section: info.Section, Topic: info.Topic}]; ok && opts.RoleOnly {
+				// Whoever takes the role starts from scratch: every topic
+				// is pending and suggested; everything else is kept.
+				if t.Status != notebook.StatusPending || !t.Suggested {
+					t.Status, t.Suggested = notebook.StatusPending, true
+					if data, err = notebook.MarshalTopic(t); err != nil {
+						return nil, err
+					}
+				}
 			}
 		}
 		if len(data) > MaxEntrySize {

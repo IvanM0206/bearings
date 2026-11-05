@@ -63,7 +63,7 @@ func init() {
 		"cmd.path.long":            "Shows the role path: all topics of type role, in order, numbered across sections, with a check mark on mastered ones. With --md, prints a Markdown guide that can be shared: it has only role topics, their notes and resources, and no personal progress.",
 
 		"cmd.export.short": "Save the notebook as a ZIP archive",
-		"cmd.export.long":  "Writes the notebook to a ZIP archive that 'bearings import' (and the web app) can read. Only the notebook's own files go in (bearings.yaml, sections and journal), each checked first; anything else in the directory, such as .git, is left out. The same notebook always gives the same archive. With --role-only the archive leaves out the journal and personal topics, so it can be shared as a guide or template for whoever takes the role next. An existing file is only replaced with --force, and the archive cannot be written inside the notebook.",
+		"cmd.export.long":  "Writes the notebook to a ZIP archive that 'bearings import' (and the web app) can read. Only the notebook's own files go in (bearings.yaml, sections and journal), each checked first; anything else in the directory, such as .git, is left out. The same notebook always gives the same archive. With --role-only the archive leaves out the journal and personal topics and marks every remaining topic as pending and suggested (notes, resources, titles and order are kept), so it can be shared as a guide or template for whoever takes the role next. An existing file is only replaced with --force, and the archive cannot be written inside the notebook.",
 		"cmd.import.short": "Create a notebook from a ZIP archive",
 		"cmd.import.long":  "Creates a new notebook from an archive made by 'bearings export' or the web app. The archive is checked completely before anything is written (unsafe names, links, encrypted entries, zip bombs and every notebook file); if anything is wrong, nothing is created. The notebook is created in --into, or else in the notebook location (--notebook, BEARINGS_NOTEBOOK or ~/bearings), which must be empty or not exist: import never merges into or overwrites a notebook. It shows what the archive holds and asks for confirmation on a terminal; scripts must pass --yes.",
 
@@ -104,7 +104,7 @@ func init() {
 		"flag.to_section":      "move the topic to the end of this section",
 
 		"flag.force":      "replace the file if it already exists",
-		"flag.role_only":  "leave out the journal and personal topics (a guide or template to share)",
+		"flag.role_only":  "leave out the journal and personal topics and reset every topic to pending and suggested (a guide to share)",
 		"flag.into":       "directory for the new notebook (default: the notebook location)",
 		"flag.yes_import": "import without asking (needed in scripts)",
 
@@ -168,7 +168,7 @@ func init() {
 		"edit.unchanged":   "No changes.",
 
 		"export.done":      "Exported %s: %d sections, %d topics, %d journal entries.",
-		"export.role_only": "Role-only archive: no journal entries and no personal topics.",
+		"export.role_only": "Role-only archive: no journal entries, no personal topics, every topic pending and suggested.",
 		"import.summary":   "The archive holds the notebook %s: %d sections, %d topics, %d journal entries.",
 		"import.prompt":    "Create a new notebook from it in %s?",
 		"import.done":      "Imported the notebook into %s: %d sections, %d topics, %d journal entries.",

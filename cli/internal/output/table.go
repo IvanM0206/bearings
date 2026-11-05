@@ -4,12 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"unicode/utf8"
 )
-
-// Width returns the display width of s, counted in characters. Content is
-// sanitized before measuring, so it matches what [Table] prints.
-func Width(s string) int { return utf8.RuneCountInString(s) }
 
 // Pad right-pads s with spaces to width w.
 func Pad(s string, w int) string {
@@ -32,6 +27,16 @@ func PadLeft(s string, w int) string {
 // trimmed. Header cells are trusted (they come from the catalog) and may be
 // styled by the caller through hdr, which receives the padded header line.
 func Table(w io.Writer, header []string, rows [][]string, hdr func(string) string) error {
+	return TableMax(w, header, rows, hdr, 0)
+}
+
+// minColWidth is the narrowest a column is squeezed to by [TableMax].
+const minColWidth = 8
+
+// TableMax is [Table] with a line width limit: when maxWidth > 0 and the
+// table would be wider, the widest columns are narrowed and their cells cut
+// with "…" until it fits (columns do not go below minColWidth cells).
+func TableMax(w io.Writer, header []string, rows [][]string, hdr func(string) string, maxWidth int) error {
 	cols := len(header)
 	widths := make([]int, cols)
 	clean := make([][]string, len(rows))
@@ -45,10 +50,24 @@ func Table(w io.Writer, header []string, rows [][]string, hdr func(string) strin
 			widths[c] = max(widths[c], Width(clean[r][c]))
 		}
 	}
+	if maxWidth > 0 {
+		for sum(widths)+2*(cols-1) > maxWidth {
+			wi := 0
+			for c := range widths {
+				if widths[c] > widths[wi] {
+					wi = c
+				}
+			}
+			if widths[wi] <= minColWidth {
+				break
+			}
+			widths[wi]--
+		}
+	}
 	line := func(cells []string) string {
 		parts := make([]string, cols)
 		for c := range parts {
-			parts[c] = Pad(cells[c], widths[c])
+			parts[c] = Pad(Truncate(cells[c], widths[c]), widths[c])
 		}
 		return strings.TrimRight(strings.Join(parts, "  "), " ")
 	}
@@ -85,4 +104,12 @@ func Percent(done, total int) int {
 		return 0
 	}
 	return done * 100 / total
+}
+
+func sum(v []int) int {
+	t := 0
+	for _, n := range v {
+		t += n
+	}
+	return t
 }

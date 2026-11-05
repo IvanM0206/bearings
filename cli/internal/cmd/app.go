@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -72,6 +73,7 @@ type app struct {
 	// Global flags.
 	notebookFlag string
 	jsonOut      bool
+	width        int // terminal width to wrap and truncate to; 0 means no limit
 	langFlag     string
 	noColor      bool
 
@@ -170,6 +172,12 @@ func (a *app) prepare(langProvided bool) error {
 		out = f
 	}
 	a.style = output.Style{On: output.ColorEnabled(a.noColor, a.getenv, out)}
+	a.width = 0
+	if out != nil && !a.jsonOut {
+		if fi, err := out.Stat(); err == nil && fi.Mode()&os.ModeCharDevice != 0 {
+			a.width = terminalWidth(a.getenv)
+		}
+	}
 	return nil
 }
 
@@ -385,3 +393,25 @@ func (p *printer) println(s string) {
 func (a *app) out() *printer { return &printer{w: a.env.Stdout} }
 
 func (a *app) writeJSON(v any) error { return output.JSON(a.env.Stdout, v) }
+
+// terminalWidth returns the width from COLUMNS when it is a sensible
+// number, else 80.
+func terminalWidth(getenv func(string) string) int {
+	if n, err := strconv.Atoi(strings.TrimSpace(getenv("COLUMNS"))); err == nil && n >= 20 && n <= 1000 {
+		return n
+	}
+	return 80
+}
+
+// wrap wraps text that will be indented by indent cells to the terminal
+// width; it is the identity when output is not a terminal.
+func (a *app) wrapText(s string, indent int) string {
+	if a.width == 0 {
+		return s
+	}
+	return output.Wrap(s, max(a.width-indent, 10))
+}
+
+func (a *app) table(header []string, rows [][]string) error {
+	return output.TableMax(a.env.Stdout, header, rows, a.style.Bold, a.width)
+}

@@ -84,7 +84,7 @@ func (a *app) lsSections(nb *notebook.Notebook) error {
 	for _, s := range res.Sections {
 		rows = append(rows, []string{s.Slug, s.Title, fmt.Sprintf("%d/%d", s.Counts.Mastered, s.Counts.Total)})
 	}
-	if err := output.Table(a.env.Stdout, []string{a.t("col.section"), a.t("col.title"), a.t("col.mastered")}, rows, a.style.Bold); err != nil {
+	if err := a.table([]string{a.t("col.section"), a.t("col.title"), a.t("col.mastered")}, rows); err != nil {
 		return err
 	}
 	return p.err
@@ -119,7 +119,7 @@ func (a *app) lsTopics(nb *notebook.Notebook, slug string, f notebook.TopicFilte
 	p := a.out()
 	p.println(a.style.Bold(output.Line(sec.Title)) + " (" + sec.Slug + ")")
 	if d := output.Text(sec.Description); d != "" {
-		p.println(d)
+		p.println(a.wrapText(d, 0))
 	}
 	p.println("")
 	if len(topics) == 0 {
@@ -135,7 +135,7 @@ func (a *app) lsTopics(nb *notebook.Notebook, slug string, f notebook.TopicFilte
 		rows = append(rows, []string{t.Slug, t.Title, a.t("status." + string(t.Status)), a.t("type." + string(t.Type)), sugg})
 	}
 	hdr := []string{a.t("col.topic"), a.t("col.title"), a.t("col.status"), a.t("col.type"), a.t("col.suggested")}
-	if err := output.Table(a.env.Stdout, hdr, rows, a.style.Bold); err != nil {
+	if err := a.table(hdr, rows); err != nil {
 		return err
 	}
 	return p.err

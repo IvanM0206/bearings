@@ -104,6 +104,21 @@ func TestRoleOnly(t *testing.T) {
 	if len(tree.Topics) != 2 || len(tree.Sections) != 2 {
 		t.Errorf("%+v", SummaryOf(tree))
 	}
+	if tree.Config.Name != "Example role" || tree.Config.Language != "en" {
+		t.Errorf("config %+v", tree.Config)
+	}
+	orig := fixtureTree(t)
+	for _, tp := range tree.Topics {
+		if tp.Status != notebook.StatusPending || !tp.Suggested {
+			t.Errorf("%s: status %s suggested %v", tp.Ref(), tp.Status, tp.Suggested)
+		}
+		for _, o := range orig.Topics {
+			if o.Ref() == tp.Ref() && (o.Title != tp.Title || o.Notes != tp.Notes || o.Order != tp.Order ||
+				!o.Created.Equal(tp.Created) || !o.Updated.Equal(tp.Updated) || len(o.Resources) != len(tp.Resources)) {
+				t.Errorf("%s: fields changed: %+v", tp.Ref(), tp)
+			}
+		}
+	}
 	if bytes.Contains(data, []byte("journal/")) || bytes.Contains(data, []byte("private")) {
 		t.Error("journal or personal topic names in the archive")
 	}

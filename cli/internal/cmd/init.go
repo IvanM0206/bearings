@@ -64,7 +64,7 @@ func (a *app) runListTemplates() error {
 		rows = append(rows, []string{i.ID, i.Title, i.Language, fmt.Sprint(i.Sections), fmt.Sprint(i.Topics)})
 	}
 	hdr := []string{a.t("col.id"), a.t("col.title"), a.t("col.language"), a.t("col.sections"), a.t("col.topics")}
-	return output.Table(a.env.Stdout, hdr, rows, a.style.Bold)
+	return a.table(hdr, rows)
 }
 
 type initJSON struct {

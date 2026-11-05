@@ -92,7 +92,7 @@ func (a *app) runJournal(from, to, section string, limit int) error {
 			head += " " + e.Section
 		}
 		p.println(a.style.Dim(head))
-		p.println(indent(output.Text(strings.TrimRight(e.Body, "\n")), "    "))
+		p.println(indent(a.wrapText(output.Text(strings.TrimRight(e.Body, "\n")), 4), "    "))
 	}
 	return p.err
 }

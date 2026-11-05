@@ -81,7 +81,7 @@ func (a *app) runSearch(query string, limit int) error {
 		}
 		rows = append(rows, []string{a.t("search.in." + string(h.Kind) + "." + h.Field), where, h.Snippet})
 	}
-	if err := output.Table(a.env.Stdout, []string{a.t("col.found_in"), a.t("col.where"), a.t("col.match")}, rows, a.style.Bold); err != nil {
+	if err := a.table([]string{a.t("col.found_in"), a.t("col.where"), a.t("col.match")}, rows); err != nil {
 		return err
 	}
 	return p.err

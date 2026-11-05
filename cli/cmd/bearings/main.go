@@ -9,9 +9,18 @@ import (
 
 func main() {
 	os.Exit(cmd.Execute(os.Args[1:], cmd.Env{
+		Stdin:       os.Stdin,
 		Stdout:      os.Stdout,
 		Stderr:      os.Stderr,
+		Interactive: isTerminal(os.Stdin) && isTerminal(os.Stderr),
 		Getenv:      os.Getenv,
 		UserHomeDir: os.UserHomeDir,
 	}))
+}
+
+// isTerminal reports whether f is a character device (a terminal), using
+// only the standard library.
+func isTerminal(f *os.File) bool {
+	fi, err := f.Stat()
+	return err == nil && fi.Mode()&os.ModeCharDevice != 0
 }

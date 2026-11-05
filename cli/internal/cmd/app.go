@@ -8,6 +8,9 @@
 //	3  the notebook is missing or invalid
 //	4  the requested section or topic does not exist
 //
+// Commands that delete data ask for confirmation on a terminal and refuse
+// to run without --yes when there is none (exit code 2).
+//
 // Messages for people go to stderr and never contain file contents;
 // results go to stdout.
 package cmd
@@ -19,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/IvanM0206/bearings/cli/internal/i18n"
 	"github.com/IvanM0206/bearings/cli/internal/notebook"
@@ -37,10 +41,16 @@ const (
 // Env is everything the commands take from the process, so that tests can
 // run them in memory.
 type Env struct {
-	Stdout      io.Writer
-	Stderr      io.Writer
+	Stdin  io.Reader // may be nil: reads as empty
+	Stdout io.Writer
+	Stderr io.Writer
+	// Interactive says that a person is at the terminal: only then do
+	// commands ask for confirmation and open an editor on request.
+	Interactive bool
 	Getenv      func(string) string
 	UserHomeDir func() (string, error)
+	// Now returns the current time; nil means time.Now. Tests set it.
+	Now func() time.Time
 }
 
 // exitError is an error with a user-facing message and an exit code.
@@ -184,6 +194,22 @@ func (a *app) wrap(err error) error {
 	return &exitError{code: ExitFailure, msg: output.Line(err.Error())}
 }
 
+// wrapInput is like wrap for errors that come from what the person typed
+// (a title, a URL, a description): they are usage errors, not a sign that
+// the notebook is broken.
+func (a *app) wrapInput(err error) error {
+	var ne *notebook.Error
+	if errors.As(err, &ne) {
+		switch ne.Code {
+		case notebook.CodeEmpty, notebook.CodeTooLong, notebook.CodeControlChar,
+			notebook.CodeInvalidValue, notebook.CodeInvalidUTF8, notebook.CodeOutOfRange,
+			notebook.CodeExists, notebook.CodeLimit, notebook.CodeTopicSectionMismatch:
+			return &exitError{code: ExitUsage, msg: a.describe(ne)}
+		}
+	}
+	return a.wrap(err)
+}
+
 func exitFor(c notebook.Code) int {
 	switch c {
 	case notebook.CodeInvalidSlug, notebook.CodeInvalidRef, notebook.CodeInvalidID,
@@ -261,6 +287,10 @@ func (a *app) notebookDir() (string, error) {
 	return filepath.Join(home, "bearings"), nil
 }
 
+func (a *app) nbOptions() *notebook.Options {
+	return &notebook.Options{OnProblem: a.warn, Now: a.env.Now}
+}
+
 // open opens the notebook and applies its language when neither --lang nor
 // BEARINGS_LANG fixed one.
 func (a *app) open() (*notebook.Notebook, notebook.Config, error) {
@@ -268,7 +298,7 @@ func (a *app) open() (*notebook.Notebook, notebook.Config, error) {
 	if err != nil {
 		return nil, notebook.Config{}, err
 	}
-	nb, err := notebook.Open(dir, &notebook.Options{OnProblem: a.warn})
+	nb, err := notebook.Open(dir, a.nbOptions())
 	if err != nil {
 		if notebook.CodeOf(err) == notebook.CodeNotNotebook {
 			return nil, notebook.Config{}, &exitError{code: ExitNotebook, msg: a.t("err.no_notebook", output.Line(dir))}

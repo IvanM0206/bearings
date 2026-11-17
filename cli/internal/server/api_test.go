@@ -224,7 +224,7 @@ func TestWritesRoundTrip(t *testing.T) {
 	if rec := e.do("POST", "/api/v1/topics/ops/deploys/status", map[string]any{"status": "nope"}); rec.Code != 422 {
 		t.Errorf("bad status: %d", rec.Code)
 	}
-	st = e.json("POST", "/api/v1/topics/ops/deploys/status", map[string]any{"status": "pending"}, 200)
+	e.json("POST", "/api/v1/topics/ops/deploys/status", map[string]any{"status": "pending"}, 200)
 	adv := e.json("POST", "/api/v1/topics/ops/deploys/advance", nil, 200)
 	if adv["status"] != "in-progress" {
 		t.Errorf("advance: %v", adv)

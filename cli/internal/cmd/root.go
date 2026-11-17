@@ -54,6 +54,7 @@ func (a *app) newRoot() *cobra.Command {
 		a.newImport(),
 		a.newSync(),
 		a.newMCP(),
+		a.newServe(),
 	)
 	return root
 }

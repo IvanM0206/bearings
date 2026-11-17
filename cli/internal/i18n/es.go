@@ -73,6 +73,9 @@ func init() {
 		"cmd.mcp.short": "Ejecuta el servidor MCP local para asistentes de IA (stdio)",
 		"cmd.mcp.long":  "Ejecuta un servidor Model Context Protocol en la entrada y salida estándar, para que un asistente de IA como Claude Code o Claude Desktop pueda leer el cuaderno. El cuaderno (--notebook, BEARINGS_NOTEBOOK o ~/bearings) queda fijo al iniciar el servidor. Es de solo lectura salvo que pases --allow-write, que agrega herramientas para añadir entradas de bitácora y temas, cambiar el estado de un tema y agregar texto a las notas de un tema; no se puede borrar nada. No abre ningún puerto de red. Los registros van a stderr y nunca contienen el contenido de las notas. Consulta docs/mcp.es.md.",
 
+		"cmd.serve.short": "Abre el cuaderno en tu navegador (interfaz web local)",
+		"cmd.serve.long":  "Inicia un servidor web local y abre la interfaz web del cuaderno en tu navegador. Escucha solo en 127.0.0.1 (nunca en la red), en un puerto al azar salvo que pases --port. La dirección lleva un secreto aleatorio válido solo durante esta ejecución; el navegador lo cambia por una cookie de sesión, de modo que otros programas y páginas web no pueden leer ni cambiar el cuaderno. Se detiene con Ctrl+C. Con --read-only no se puede cambiar nada desde el navegador. No se envía nada por internet.",
+
 		// Flags.
 		"flag.notebook":      "directorio del cuaderno (por defecto: $BEARINGS_NOTEBOOK; si no, ~/bearings)",
 		"flag.json":          "imprime el resultado como JSON",
@@ -96,6 +99,9 @@ func init() {
 		"flag.yes":         "confirma sin preguntar (necesario en scripts)",
 		"flag.allow_write": "registra también las herramientas que escriben en el cuaderno (no se puede borrar nada)",
 		"flag.log_level":   "nivel de detalle de los registros en stderr: error, warn, info, debug",
+		"flag.port":        "puerto en el que escuchar (por defecto: uno libre al azar)",
+		"flag.read_only":   "no permite cambios desde el navegador",
+		"flag.no_open":     "no abre el navegador; solo muestra la dirección",
 		"flag.up":          "mueve un lugar hacia arriba",
 		"flag.down":        "mueve un lugar hacia abajo",
 
@@ -232,6 +238,12 @@ func init() {
 		"err.unknown_command":      "comando desconocido %q",
 		"err.unknown_language":     "idioma desconocido %q (disponibles: %s)",
 		"err.bad_log_level":        "nivel de registro desconocido %q (disponibles: error, warn, info, debug)",
+		"err.bad_port":             "puerto no válido %q: usa un número de 0 a 65535",
+		"err.serve_listen":         "no se puede escuchar en 127.0.0.1: %s",
+		"serve.listening":          "Sirviendo el cuaderno solo en 127.0.0.1. Mantén privada esta dirección: da acceso al cuaderno mientras este comando se ejecuta. Pulsa Ctrl+C para detenerlo.",
+		"serve.read_only":          "Modo de solo lectura: los cambios desde el navegador están desactivados.",
+		"serve.open_failed":        "No se pudo abrir el navegador; abre tú mismo la dirección de arriba.",
+		"serve.stopped":            "Servidor detenido.",
 		"err.no_home":              "no se encuentra tu directorio personal; usa --notebook o BEARINGS_NOTEBOOK",
 		"err.no_notebook":          "no se encontró un cuaderno en %s (elige uno con --notebook o BEARINGS_NOTEBOOK)",
 		"err.bad_section":          "sección no válida %q: usa el nombre de la sección tal como lo muestra 'bearings ls' (letras minúsculas, dígitos y guiones)",

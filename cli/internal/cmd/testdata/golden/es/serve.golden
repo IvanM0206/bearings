@@ -1,0 +1,7 @@
+exit 0
+--- stdout
+http://127.0.0.1:PORT/auth?token=TOKEN
+--- stderr
+Sirviendo el cuaderno solo en 127.0.0.1. Mantén privada esta dirección: da acceso al cuaderno mientras este comando se ejecuta. Pulsa Ctrl+C para detenerlo.
+Modo de solo lectura: los cambios desde el navegador están desactivados.
+Servidor detenido.

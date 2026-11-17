@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -339,20 +340,20 @@ func TestReadOnlyBlocksEveryWriteRoute(t *testing.T) {
 func snapshotDir(t *testing.T, dir string) string {
 	t.Helper()
 	var b strings.Builder
-	must(t, filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
+	fsys := os.DirFS(dir)
+	must(t, fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		rel, _ := filepath.Rel(dir, p)
 		if d.IsDir() {
-			b.WriteString("D " + rel + "\n")
+			b.WriteString("D " + p + "\n")
 			return nil
 		}
-		data, err := os.ReadFile(p)
+		data, err := fs.ReadFile(fsys, p)
 		if err != nil {
 			return err
 		}
-		b.WriteString("F " + rel + "\n" + string(data) + "\n")
+		b.WriteString("F " + p + "\n" + string(data) + "\n")
 		return nil
 	}))
 	return b.String()
@@ -569,7 +570,7 @@ func TestPathTraversalInBodies(t *testing.T) {
 	}
 	for _, c := range cases {
 		rec := e.do(c.method, c.target, c.body)
-		if rec.Code != 400 && rec.Code != 422 && !(rec.Code == 404 && strings.Contains(fmt.Sprint(c.body), "a/b")) {
+		if rec.Code != 400 && rec.Code != 422 && (rec.Code != 404 || !strings.Contains(fmt.Sprint(c.body), "a/b")) {
 			t.Errorf("%s %s %v: status %d %s", c.method, c.target, c.body, rec.Code, rec.Body.String())
 		}
 	}

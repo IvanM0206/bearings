@@ -233,6 +233,32 @@ Consulta [docs/mcp.es.md](../docs/mcp.es.md) (en inglés:
 [docs/mcp.md](../docs/mcp.md)) para ver las herramientas, las notas de
 seguridad y la configuración de Claude Desktop.
 
+## Interfaz web
+
+`bearings serve [--port N] [--read-only] [--no-open]` inicia un servidor web
+local y abre el cuaderno en tu navegador. La interfaz llegará en una versión
+posterior; esta versión incluye el servidor y su API JSON (`/api/v1`) con una
+página provisional.
+
+- Escucha solo en `127.0.0.1` (fijo, no configurable), en un puerto al azar
+  salvo que se pase `--port`, e imprime una dirección como
+  `http://127.0.0.1:PUERTO/auth?token=...`.
+- El token es aleatorio (256 bits), válido solo durante esta ejecución, y se
+  cambia por una cookie de sesión (`HttpOnly`, `SameSite=Strict`, sin
+  caducidad) y se quita de la barra de direcciones. Toda petición a `/api/`
+  necesita la cookie. Los archivos estáticos de la página no contienen datos
+  del cuaderno y no la necesitan.
+- Se rechazan las peticiones con otro `Host` (DNS rebinding); los cambios
+  exigen una cabecera `Origin` del mismo origen y `application/json`; nunca se
+  envía una cabecera CORS; se aplica una Content-Security-Policy estricta (sin
+  scripts ni estilos en línea).
+- `--read-only` rechaza todo cambio con 403. Las actualizaciones llevan la
+  versión leída del disco, así que un archivo modificado entretanto da un
+  conflicto 409 y nunca se sobrescribe.
+- La dirección lleva el token: mantenla privada. También es visible para otros
+  usuarios del mismo equipo en la lista de procesos mientras se lanza el
+  navegador; en equipos compartidos usa `--no-open` y pega la dirección tú.
+
 ## Confirmación y scripts
 
 Los comandos que eliminan datos (`section rm`, `topic rm`, `topic edit

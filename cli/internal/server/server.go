@@ -33,7 +33,7 @@ const (
 	writeTimeout      = 30 * time.Second
 	idleTimeout       = 60 * time.Second
 	maxHeaderBytes    = 16 << 10
-	shutdownTimeout   = 5 * time.Second
+	shutdownTimeout   = 3 * time.Second
 )
 
 // MaxBodyBytes is the largest request body accepted: the largest file of
@@ -154,9 +154,14 @@ func (s *Server) Serve(ctx context.Context) error {
 		defer cancel()
 		err := srv.Shutdown(sctx)
 		if err != nil {
+			// A connection that does not finish in time is cut: the
+			// person asked to stop.
 			_ = srv.Close()
 		}
 		<-errc
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil
+		}
 		return err
 	}
 }

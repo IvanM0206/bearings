@@ -81,7 +81,7 @@ func (s *Server) serveStatic(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 	w.WriteHeader(http.StatusOK)
 	if r.Method == http.MethodGet {
-		_, _ = w.Write(data)
+		_, _ = w.Write(data) //nolint:gosec // G705: embedded build output with a fixed Content-Type table and nosniff, not user input
 	}
 }
 

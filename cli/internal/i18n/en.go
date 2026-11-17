@@ -73,6 +73,9 @@ func init() {
 		"cmd.mcp.short": "Run the local MCP server for AI assistants (stdio)",
 		"cmd.mcp.long":  "Runs a Model Context Protocol server on stdin and stdout, so that an AI assistant such as Claude Code or Claude Desktop can read the notebook. The notebook (--notebook, BEARINGS_NOTEBOOK or ~/bearings) is fixed when the server starts. It is read-only unless you pass --allow-write, which adds tools to add journal entries and topics, set a topic's status and append to a topic's notes; nothing can be deleted. There is no network listener. Logs go to stderr and never contain note content. See docs/mcp.md.",
 
+		"cmd.serve.short": "Open the notebook in your browser (local web interface)",
+		"cmd.serve.long":  "Starts a local web server and opens the notebook's web interface in your browser. It listens on 127.0.0.1 only (never on the network), on a random port unless you pass --port. The address carries a random secret that is valid for this run only; the browser exchanges it for a session cookie, so other programs and web pages cannot read or change the notebook. Stop it with Ctrl+C. With --read-only nothing can be changed from the browser. Nothing is sent over the internet.",
+
 		// Flags.
 		"flag.notebook":      "notebook directory (default: $BEARINGS_NOTEBOOK, else ~/bearings)",
 		"flag.json":          "print the result as JSON",
@@ -96,6 +99,9 @@ func init() {
 		"flag.yes":         "confirm without asking (needed in scripts)",
 		"flag.allow_write": "also register the tools that write to the notebook (nothing can be deleted)",
 		"flag.log_level":   "log detail on stderr: error, warn, info, debug",
+		"flag.port":        "port to listen on (default: a random free port)",
+		"flag.read_only":   "do not allow changes from the browser",
+		"flag.no_open":     "do not open the browser; only print the address",
 		"flag.up":          "move one place up",
 		"flag.down":        "move one place down",
 
@@ -232,6 +238,12 @@ func init() {
 		"err.unknown_command":      "unknown command %q",
 		"err.unknown_language":     "unknown language %q (available: %s)",
 		"err.bad_log_level":        "unknown log level %q (available: error, warn, info, debug)",
+		"err.bad_port":             "invalid port %q: use a number from 0 to 65535",
+		"err.serve_listen":         "cannot listen on 127.0.0.1: %s",
+		"serve.listening":          "Serving the notebook on 127.0.0.1 only. Keep this address private: it gives access to the notebook while this command runs. Press Ctrl+C to stop.",
+		"serve.read_only":          "Read-only mode: changes from the browser are disabled.",
+		"serve.open_failed":        "Could not open the browser; open the address above yourself.",
+		"serve.stopped":            "Server stopped.",
 		"err.no_home":              "cannot find your home directory; use --notebook or BEARINGS_NOTEBOOK",
 		"err.no_notebook":          "no notebook found at %s (choose one with --notebook or BEARINGS_NOTEBOOK)",
 		"err.bad_section":          "invalid section %q: use the section's name as shown by 'bearings ls' (lowercase letters, digits and hyphens)",

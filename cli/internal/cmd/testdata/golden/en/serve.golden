@@ -1,0 +1,7 @@
+exit 0
+--- stdout
+http://127.0.0.1:PORT/auth?token=TOKEN
+--- stderr
+Serving the notebook on 127.0.0.1 only. Keep this address private: it gives access to the notebook while this command runs. Press Ctrl+C to stop.
+Read-only mode: changes from the browser are disabled.
+Server stopped.

@@ -73,7 +73,7 @@ func (s *Server) serveAuth(w http.ResponseWriter, r *http.Request) {
 	// A session cookie: no Expires or Max-Age, so it goes away when the
 	// browser closes. Secure is not set because the page is plain http on
 	// loopback.
-	http.SetCookie(w, &http.Cookie{
+	http.SetCookie(w, &http.Cookie{ //nolint:gosec // G124: Secure is impossible on plain-http loopback; HttpOnly and SameSite=Strict are set
 		Name:     s.cookie,
 		Value:    s.token,
 		Path:     "/",
@@ -96,7 +96,7 @@ func pathIsClean(u *url.URL) bool {
 		return false
 	}
 	for i, seg := range strings.Split(strings.TrimPrefix(u.Path, "/"), "/") {
-		if seg == "." || seg == ".." || (seg == "" && !(i == 0 && u.Path == "/")) {
+		if seg == "." || seg == ".." || (seg == "" && (i != 0 || u.Path != "/")) {
 			return false
 		}
 	}

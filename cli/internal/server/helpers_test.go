@@ -159,7 +159,7 @@ func (e *testEnv) newReq(method, target string, body any, opts ...opt) *http.Req
 	}
 	r := httptest.NewRequest(method, target, rd)
 	r.Host = e.host()
-	r.AddCookie(&http.Cookie{Name: e.srv.cookie, Value: e.srv.token})
+	r.AddCookie(&http.Cookie{Name: e.srv.cookie, Value: e.srv.token}) //nolint:gosec // G124: test request cookie
 	if rd != nil {
 		r.Header.Set("Content-Type", "application/json")
 	}
@@ -224,6 +224,8 @@ func newTestLogger(w io.Writer) *slog.Logger {
 	return slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{Level: slog.LevelDebug}))
 }
 
-func netListenAll() (net.Listener, error) { return net.Listen("tcp4", "0.0.0.0:0") }
+func netListenAll() (net.Listener, error) {
+	return net.Listen("tcp4", "0.0.0.0:0") //nolint:gosec // G102: the test checks that New refuses such a listener
+}
 
 func jsonUnmarshal(b []byte, v any) error { return json.Unmarshal(b, v) }

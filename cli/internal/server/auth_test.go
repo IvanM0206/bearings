@@ -33,12 +33,18 @@ func TestTokenFlow(t *testing.T) {
 	c, _, _ := e.start(t)
 	base := e.srv.BaseURL()
 
-	get := func(target string) *http.Response {
+	type reply struct {
+		StatusCode int
+		Header     http.Header
+		cookies    []*http.Cookie
+	}
+	get := func(target string) reply {
 		t.Helper()
 		resp, err := c.Get(base + target)
 		must(t, err)
-		t.Cleanup(func() { _ = resp.Body.Close() })
-		return resp
+		defer func() { _ = resp.Body.Close() }()
+		_, _ = io.Copy(io.Discard, resp.Body)
+		return reply{resp.StatusCode, resp.Header, resp.Cookies()}
 	}
 
 	// The printed URL carries the token on the dedicated path.
@@ -70,7 +76,7 @@ func TestTokenFlow(t *testing.T) {
 	if loc := resp.Header.Get("Location"); loc != "/" {
 		t.Errorf("Location %q: the token must not stay in the URL", loc)
 	}
-	cs := resp.Cookies()
+	cs := resp.cookies
 	if len(cs) != 1 {
 		t.Fatalf("cookies: %v", cs)
 	}
@@ -179,7 +185,7 @@ func TestTwoInstancesHaveDifferentCookies(t *testing.T) {
 	// one is never read as a session of the other.
 	r := a.newReq("GET", "/api/v1/info", nil)
 	r.Header.Del("Cookie")
-	r.AddCookie(&http.Cookie{Name: b.srv.cookie, Value: a.srv.token})
+	r.AddCookie(&http.Cookie{Name: b.srv.cookie, Value: a.srv.token}) //nolint:gosec // G124: test request cookie
 	if rec := a.serve(r); rec.Code != 401 {
 		t.Errorf("foreign cookie accepted: %d", rec.Code)
 	}
@@ -274,7 +280,8 @@ func TestGracefulShutdown(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("Serve did not stop")
 	}
-	if _, err := c.Get(e.srv.BaseURL() + "/"); err == nil {
+	if resp, err := c.Get(e.srv.BaseURL() + "/"); err == nil {
+		_ = resp.Body.Close()
 		t.Error("server still answers after shutdown")
 	}
 }

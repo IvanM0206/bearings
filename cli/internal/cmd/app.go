@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -57,6 +58,14 @@ type Env struct {
 	Environ func() []string
 	// LookPath finds a program on PATH; nil means exec.LookPath.
 	LookPath func(string) (string, error)
+	// Context stops long-running commands (serve); nil means no external
+	// cancellation (the command still stops on SIGINT and SIGTERM).
+	Context context.Context
+	// OpenURL opens a URL in the browser; nil means the platform's opener.
+	OpenURL func(string) error
+	// Rand is the source of randomness for the web server's token; nil
+	// means crypto/rand. Tests set it.
+	Rand io.Reader
 }
 
 // exitError is an error with a user-facing message and an exit code.
@@ -92,7 +101,7 @@ func Execute(args []string, env Env) int {
 	root.SetArgs(args)
 	root.SetOut(env.Stdout)
 	root.SetErr(env.Stderr)
-	err := root.Execute()
+	err := root.ExecuteContext(env.Context)
 	if err == nil {
 		return ExitOK
 	}

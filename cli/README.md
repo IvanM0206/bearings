@@ -222,6 +222,29 @@ claude mcp add bearings -- bearings mcp
 See [docs/mcp.md](../docs/mcp.md) (Spanish: [docs/mcp.es.md](../docs/mcp.es.md))
 for the tools, the security notes and the setup for Claude Desktop.
 
+## Web interface
+
+`bearings serve [--port N] [--read-only] [--no-open]` starts a local web
+server and opens the notebook in your browser. The interface itself arrives
+in a later release; this version ships the server and its JSON API
+(`/api/v1`) with a placeholder page.
+
+- It listens on `127.0.0.1` only (fixed, not configurable), on a random port
+  unless `--port` is given, and prints an address such as
+  `http://127.0.0.1:PORT/auth?token=...`.
+- The token is random (256 bits), valid for this run only, and is exchanged
+  for a session cookie (`HttpOnly`, `SameSite=Strict`, no expiry) and removed
+  from the address bar. Every `/api/` request needs the cookie. The page's
+  static files carry no notebook data and need no cookie.
+- Requests with another `Host` are refused (DNS rebinding); changes need a
+  same-origin `Origin` header and `application/json`; no CORS header is ever
+  sent; a strict Content-Security-Policy (no inline scripts or styles) is set.
+- `--read-only` refuses every change with 403. Updates carry the version read
+  from disk, so a file changed meanwhile is a 409 conflict, never overwritten.
+- The address carries the token: keep it private. It is also visible to other
+  users of the same machine in the process list while the browser is being
+  launched; use `--no-open` on shared machines and paste the address yourself.
+
 ## Confirmation and scripts
 
 Commands that delete data (`section rm`, `topic rm`, `topic edit

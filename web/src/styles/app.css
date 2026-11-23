@@ -288,10 +288,6 @@ main {
 }
 
 .nav-short {
-  display: inline;
-}
-
-.nav-label {
   display: none;
 }
 
@@ -318,17 +314,14 @@ main {
   background: var(--sun-hover);
 }
 
-.nav li:has(.nav-short) .nav-label {
-  display: none;
-}
-
-@media (min-width: 380px) {
-  .nav-label {
-    display: inline;
+/* On narrow phones long labels use their short form ("Path"). */
+@media (max-width: 479px) {
+  .nav li:has(.nav-short) .nav-label {
+    display: none;
   }
 
-  .nav-short {
-    display: none;
+  .nav li:has(.nav-short) .nav-short {
+    display: inline;
   }
 }
 
@@ -397,15 +390,6 @@ main {
     padding: 0.65rem 0.85rem;
     font-size: 1rem;
     height: auto;
-  }
-
-  .nav-label,
-  .nav li:has(.nav-short) .nav-label {
-    display: inline;
-  }
-
-  .nav-short {
-    display: none;
   }
 
   .nav .nav-privacy {
@@ -657,6 +641,10 @@ a.tag {
   flex-wrap: wrap;
 }
 
+.field {
+  min-width: 0;
+}
+
 .field-row {
   display: grid;
   gap: 0.9rem;
@@ -708,13 +696,23 @@ input[type='radio'] {
 .filters-form {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: end;
+}
+
+.filters-form > :nth-child(3),
+.filters-form > :nth-child(4) {
+  grid-column: 1 / -1;
 }
 
 @media (min-width: 640px) {
   .filters-form {
     grid-template-columns: 1fr 1fr 1.4fr auto;
+  }
+
+  .filters-form > :nth-child(3),
+  .filters-form > :nth-child(4) {
+    grid-column: auto;
   }
 }
 

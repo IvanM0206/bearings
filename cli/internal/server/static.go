@@ -9,13 +9,12 @@ import (
 	"strings"
 )
 
-// The compiled web interface lives in webdist/. For now it holds a
-// placeholder page.
-//
-// TODO(stage 2): add a generator here that builds web/ and copies its
-// output into webdist/ (a go:generate directive running the web build), so
-// that `go build` keeps working with Go alone from the committed output.
-//
+// The compiled web interface lives in webdist/. It is generated from web/
+// (React + TypeScript) by `go generate ./internal/server`, which needs
+// Node.js; the output is committed so that building bearings needs Go only.
+// CI regenerates it and fails when the committed copy is out of date.
+//go:generate go run ./gen ../../../web webdist
+
 //go:embed all:webdist
 var webdistFS embed.FS
 
